@@ -138,14 +138,6 @@
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
-          <!-- PWA Install Sidebar Button -->
-          <li class="nav-item mb-2 pwa-install-btn">
-            <a href="javascript:void(0);" onclick="window.showPwaInstallPrompt()" class="nav-link" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white !important; border-radius: 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(16,185,129,0.35);">
-              <i class="nav-icon fas fa-mobile-alt text-white"></i>
-              <p>📲 Weka App Kwenye Simu</p>
-            </a>
-          </li>
-
           @if(Auth::user()->hasRole('accountant') && !Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'treasurer', 'department_leader']))
           {{-- ══════════════════════════════════════════════════════════ --}}
           {{-- ACCOUNTANT (MHASIBU) — income & members only              --}}
@@ -893,6 +885,34 @@
 
     $(document).on('click', 'a[href*="pledges"], a[href*="projects"], .new-project-badge', function() {
         $('.new-project-badge').fadeOut(200);
+    });
+
+    // Reliable Sidebar Accordion Dropdown Handler
+    $(document).on('click', '.nav-sidebar .nav-item.has-treeview > .nav-link, .nav-sidebar .nav-item:has(> .nav-treeview) > .nav-link', function(e) {
+        var $link = $(this);
+        var $parent = $link.closest('.nav-item');
+        var $treeview = $parent.children('.nav-treeview');
+
+        if ($treeview.length > 0) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if ($parent.hasClass('menu-open')) {
+                $treeview.slideUp(180, function() {
+                    $parent.removeClass('menu-open');
+                });
+            } else {
+                $parent.addClass('menu-open');
+                $treeview.slideDown(180);
+            }
+        }
+    });
+
+    // Auto-close sidebar on mobile when navigating
+    $(document).on('click', '.nav-sidebar .nav-treeview .nav-link, .nav-sidebar > .nav-item:not(.has-treeview) > .nav-link', function() {
+        if ($(window).width() < 992) {
+            $('body').removeClass('sidebar-open').addClass('sidebar-closed sidebar-collapse');
+        }
     });
 </script>
 

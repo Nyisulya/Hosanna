@@ -20,19 +20,13 @@
     }
 
     let deferredPrompt = null;
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-    const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase()) && !window.MSStream;
+    const isInstalledAlready = localStorage.getItem('pwa_installed') === 'true';
 
     // Listen for beforeinstallprompt (Android / Chrome / Edge)
     window.addEventListener('beforeinstallprompt', function (e) {
+        if (isStandalone || isInstalledAlready) return;
         e.preventDefault();
         deferredPrompt = e;
-
-        // Show install button in sidebar / navbar if present
-        document.querySelectorAll('.pwa-install-btn').forEach(btn => {
-            btn.classList.remove('hidden');
-            btn.style.display = 'block';
-        });
 
         // Automatically show popup if not dismissed recently
         const dismissedAt = localStorage.getItem('pwa_dismissed_at');
@@ -46,6 +40,7 @@
 
     // Check if app was installed
     window.addEventListener('appinstalled', function () {
+        localStorage.setItem('pwa_installed', 'true');
         deferredPrompt = null;
         hideInstallPopup();
         console.log('[PWA] App was installed successfully.');
@@ -59,6 +54,7 @@
             deferredPrompt.prompt();
             deferredPrompt.userChoice.then(function (choiceResult) {
                 if (choiceResult.outcome === 'accepted') {
+                    localStorage.setItem('pwa_installed', 'true');
                     console.log('[PWA] User accepted the install prompt');
                 }
                 deferredPrompt = null;
@@ -66,8 +62,8 @@
             });
         } else if (isIOS && !isStandalone) {
             showIOSGuideModal();
-        } else if (isStandalone) {
-            alert('App hii tayari imewekwa kwenye kifaa chako!');
+        } else if (isStandalone || isInstalledAlready) {
+            hideInstallPopup();
         } else {
             showInstallPopup();
         }
