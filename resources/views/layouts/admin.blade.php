@@ -136,7 +136,7 @@
     <div class="sidebar">
       <!-- Sidebar Menu -->
       <nav class="mt-2">
-        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+        <ul class="nav nav-pills nav-sidebar flex-column" role="menu" id="mainSidebarMenu">
 
           @if(Auth::user()->hasRole('accountant') && !Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'treasurer', 'department_leader']))
           {{-- ══════════════════════════════════════════════════════════ --}}
@@ -886,6 +886,23 @@
     $(document).on('click', 'a[href*="pledges"], a[href*="projects"], .new-project-badge', function() {
         $('.new-project-badge').fadeOut(200);
     });
+
+    // Sidebar dropdown toggle (single owner; AdminLTE treeview widget is disabled)
+    document.addEventListener('click', function(e) {
+        var link = e.target.closest ? e.target.closest('#mainSidebarMenu .nav-item > a.nav-link') : null;
+        if (!link) return;
+        var item = link.parentElement;
+        var sub = null;
+        for (var i = 0; i < item.children.length; i++) {
+            if (item.children[i].classList.contains('nav-treeview')) { sub = item.children[i]; break; }
+        }
+        if (!sub) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        sub.style.display = '';
+        item.classList.toggle('menu-open');
+    }, true);
 
     // Auto-close sidebar on mobile when clicking a real page link (not accordion headers)
     function closeMobileSidebar() {
