@@ -887,12 +887,23 @@
         $('.new-project-badge').fadeOut(200);
     });
 
-    // Auto-close sidebar on mobile only when clicking actual navigation pages (not accordion dropdown headers)
-    $(document).on('click', '.nav-sidebar a.nav-link[href]:not([href="#"]):not([href^="javascript:"])', function() {
-        if ($(window).width() < 992) {
-            $('body').removeClass('sidebar-open').addClass('sidebar-closed sidebar-collapse');
+    // Auto-close sidebar on mobile when clicking a real page link (not accordion headers)
+    function closeMobileSidebar() {
+        if (window.innerWidth < 992) {
+            document.body.classList.remove('sidebar-open', 'sidebar-collapse');
+            document.body.classList.add('sidebar-closed');
         }
-    });
+    }
+    document.addEventListener('click', function(e) {
+        var link = e.target.closest ? e.target.closest('.main-sidebar .nav-sidebar a.nav-link') : null;
+        if (!link) return;
+        var href = link.getAttribute('href');
+        if (!href || href === '#' || href.indexOf('javascript:') === 0) return;
+        closeMobileSidebar();
+        setTimeout(closeMobileSidebar, 50);
+        setTimeout(closeMobileSidebar, 400);
+    }, true);
+    document.addEventListener('spa:contentLoaded', closeMobileSidebar);
 </script>
 
 @stack('scripts')
