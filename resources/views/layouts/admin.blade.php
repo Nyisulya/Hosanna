@@ -887,29 +887,8 @@
         $('.new-project-badge').fadeOut(200);
     });
 
-    // Reliable Sidebar Accordion Dropdown Handler
-    $(document).on('click', '.nav-sidebar .nav-item.has-treeview > .nav-link, .nav-sidebar .nav-item:has(> .nav-treeview) > .nav-link', function(e) {
-        var $link = $(this);
-        var $parent = $link.closest('.nav-item');
-        var $treeview = $parent.children('.nav-treeview');
-
-        if ($treeview.length > 0) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if ($parent.hasClass('menu-open')) {
-                $treeview.slideUp(180, function() {
-                    $parent.removeClass('menu-open');
-                });
-            } else {
-                $parent.addClass('menu-open');
-                $treeview.slideDown(180);
-            }
-        }
-    });
-
-    // Auto-close sidebar on mobile when navigating
-    $(document).on('click', '.nav-sidebar .nav-treeview .nav-link, .nav-sidebar > .nav-item:not(.has-treeview) > .nav-link', function() {
+    // Auto-close sidebar on mobile only when clicking actual navigation pages (not accordion dropdown headers)
+    $(document).on('click', '.nav-sidebar a.nav-link[href]:not([href="#"]):not([href^="javascript:"])', function() {
         if ($(window).width() < 992) {
             $('body').removeClass('sidebar-open').addClass('sidebar-closed sidebar-collapse');
         }
