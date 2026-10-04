@@ -95,6 +95,14 @@ class Member extends Model
             ->withTimestamps();
     }
 
+    public function smallGroup()
+    {
+        return $this->belongsToMany(SmallGroup::class, 'small_group_member')
+            ->withPivot('role', 'joined_at')
+            ->withTimestamps()
+            ->one();
+    }
+
     public function smallGroupResponses()
     {
         return $this->hasMany(SmallGroupResponse::class);

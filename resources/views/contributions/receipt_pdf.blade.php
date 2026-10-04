@@ -89,7 +89,7 @@
 <body>
     <div class="receipt-container">
         <div class="header">
-            <h1>MANZESE SDA CHURCH</h1>
+            <h1>{{ $churchName ?? config('app.name', 'HOSANNA INTERNATIONAL CHURCH') }}</h1>
             <p>{{ __('Giving & Finance Department') }}</p>
         </div>
 
@@ -144,7 +144,7 @@
 
         <div class="footer">
             <p>{{ __('Thank you for supporting the work of the Lord.') }}</p>
-            <p>&copy; {{ date('Y') }} Manzese SDA Church. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} {{ $churchName ?? config('app.name', 'Hosanna International Church') }}. All rights reserved.</p>
         </div>
     </div>
 </body>

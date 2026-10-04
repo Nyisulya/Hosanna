@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Manzese Seventh Day Adventist Church</title>
+    <title>Login - {{ $churchName ?? config('app.name', 'Hosanna International Church') }}</title>
     
     <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -200,11 +200,20 @@
 <body>
     <div class="login-container">
         <div class="login-card">
-            <div class="login-header">
+            <div class="login-header" style="position: relative;">
+                <div style="position: absolute; top: 15px; right: 15px;">
+                    <a href="{{ route('lang.switch', app()->getLocale() == 'sw' ? 'en' : 'sw') }}" class="btn btn-sm btn-light" style="border-radius: 20px; font-size: 12px; font-weight: 600; padding: 4px 12px; opacity: 0.95; box-shadow: 0 2px 5px rgba(0,0,0,0.15); text-decoration: none; color: #1e3a8a;">
+                        @if(app()->getLocale() == 'sw')
+                            🇺🇸 English
+                        @else
+                            🇹🇿 Kiswahili
+                        @endif
+                    </a>
+                </div>
                 <div class="church-logo">
                     <img src="{{ asset('images/sda-logo.png') }}" alt="SDA Logo" style="width: 90px; height: 90px; object-fit: contain;">
                 </div>
-                <div class="church-name">MANZESE SDA CHURCH</div>
+                <div class="church-name">{{ $churchName ?? config('app.name', 'Hosanna International Church') }}</div>
                 <div class="church-tagline">{{ __('Church Management System') }}</div>
             </div>
             
@@ -269,7 +278,7 @@
                 </form>
                 
                 <div class="footer-text">
-                    &copy; {{ date('Y') }} Manzese Seventh Day Adventist Church
+                    &copy; {{ date('Y') }} {{ $churchName ?? config('app.name', 'Hosanna International Church') }}
                 </div>
             </div>
         </div>

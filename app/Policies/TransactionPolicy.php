@@ -28,12 +28,18 @@ class TransactionPolicy
      */
     public function create(User $user): bool
     {
+        if ($user->hasRole('pastor') && !$user->hasRole('super_admin')) {
+            return false;
+        }
         return $user->hasPermissionTo('finance-create');
     }
 
     public function update(User $user, Transaction $transaction): bool
     {
-        return $user->hasAnyRole(['super_admin', 'admin']);
+        if ($user->hasRole('pastor') && !$user->hasRole('super_admin')) {
+            return false;
+        }
+        return $user->hasAnyRole(['super_admin', 'admin', 'treasurer']);
     }
 
     /**
@@ -41,6 +47,9 @@ class TransactionPolicy
      */
     public function delete(User $user, Transaction $transaction): bool
     {
+        if ($user->hasRole('pastor') && !$user->hasRole('super_admin')) {
+            return false;
+        }
         return $user->hasAnyRole(['super_admin', 'admin']);
     }
 }

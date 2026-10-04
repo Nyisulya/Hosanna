@@ -14,10 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\CheckProfileComplete::class,
+            \App\Http\Middleware\RestrictAccountantAccess::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
             'pesapal/ipn',
+            'harakapay/callback',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

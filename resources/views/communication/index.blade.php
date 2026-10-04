@@ -91,6 +91,21 @@
                 </div>
                 <div class="card-body p-0">
                     <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <strong class="text-primary"><i class="fas fa-church mr-1"></i> Mwaliko wa Ibada ya Jumapili</strong>
+                                    <p class="text-muted small mb-0">Hutuma SMS kiotomatiki kila Jumamosi saa 1:00 Asubuhi kuwakaribisha Jumapili</p>
+                                </div>
+                                <span class="badge badge-success">Imeratibiwa</span>
+                            </div>
+                            <form action="{{ route('reports.communication.saturday-reminder') }}" method="POST" onsubmit="return confirm('Je, una uhakika unataka kutuma SMS za mwaliko wa Ibada ya Jumapili kwa waumini wote sasa hivi?');">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-outline-primary btn-block">
+                                    <i class="fas fa-paper-plane mr-1"></i> Tuma Mwaliko wa Ibada ya Jumapili Sasa
+                                </button>
+                            </form>
+                        </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
                                 <strong>🎂 Birthday Wishes</strong>
@@ -122,6 +137,32 @@
                             </div>
                         </li>
                     </ul>
+                </div>
+            </div>
+
+            <!-- SMS Gateway Status -->
+            <div class="card card-success card-outline mt-3">
+                <div class="card-header py-2">
+                    <h3 class="card-title text-success font-weight-bold" style="font-size: 14px;">
+                        <i class="fas fa-mobile-alt mr-1"></i> SMS Gateway (SMS Gate App)
+                    </h3>
+                </div>
+                <div class="card-body p-2 small">
+                    <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                        <span>Hali ya Seva:</span>
+                        <span class="badge badge-success">api.sms-gate.app (Online)</span>
+                    </div>
+                    <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                        <span>Mtumiaji:</span>
+                        <code>{{ config('services.sms_gate.username') ?: 'Haijawekwa' }}</code>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Device ID:</span>
+                        <code>{{ config('services.sms_gate.device_id') ? \Illuminate\Support\Str::limit(config('services.sms_gate.device_id'), 14) : 'Haijawekwa' }}</code>
+                    </div>
+                    <a href="{{ route('settings.index') }}" class="btn btn-xs btn-outline-secondary btn-block">
+                        <i class="fas fa-cog mr-1"></i> Badilisha Mipangilio ya SMS
+                    </a>
                 </div>
             </div>
 

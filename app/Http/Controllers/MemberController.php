@@ -85,13 +85,34 @@ class MemberController extends Controller
         
         $data = $request->validated();
         
+        // Handle profile photo upload
+        if ($request->hasFile('profile_photo')) {
+            $path = $request->file('profile_photo')->store('profile_photos', 'public');
+            $data['profile_photo'] = $path;
+        }
+
+        // Generate email if not provided
+        if (empty($data['email'])) {
+            $baseSlug = \Illuminate\Support\Str::slug($data['full_name'], '.');
+            if (empty($baseSlug)) {
+                $baseSlug = 'mshiriki';
+            }
+            $emailCandidate = $baseSlug . rand(100, 999) . '@hosannachurch.org';
+            while (\App\Models\Member::where('email', $emailCandidate)->exists() || \App\Models\User::where('email', $emailCandidate)->exists()) {
+                $emailCandidate = $baseSlug . rand(1000, 9999) . '@hosannachurch.org';
+            }
+            $data['email'] = $emailCandidate;
+        }
+
+        $plainPassword = !empty($data['password']) ? $data['password'] : 'password123';
+
         // Create User
         \App\Models\User::$createMemberProfile = false;
         try {
             $user = \App\Models\User::create([
-                'name' => $data['full_name'],
-                'email' => $data['email'],
-                'password' => \Illuminate\Support\Facades\Hash::make($data['password']),
+                'name'     => $data['full_name'],
+                'email'    => $data['email'],
+                'password' => \Illuminate\Support\Facades\Hash::make($plainPassword),
             ]);
         } finally {
             \App\Models\User::$createMemberProfile = true;
@@ -99,9 +120,12 @@ class MemberController extends Controller
 
         // Assign Role
         $role = $request->input('member_type', 'member');
-        $user->assignRole($role);
+        if (!empty($role)) {
+            $user->assignRole($role);
+        }
 
         $data['user_id'] = $user->id;
+        $data['status']  = $data['status'] ?? 'active';
 
         $member = Member::create($data);
         
@@ -109,7 +133,7 @@ class MemberController extends Controller
             $member->departments()->sync($data['departments']);
         }
 
-        return redirect()->route('members.show', $member)->with('status', 'Member created successfully. Default password is "password123"');
+        return redirect()->route('members.index')->with('success', 'Mshiriki mpya ' . $member->full_name . ' amesajiliwa kikamilifu!');
     }
 
     /**

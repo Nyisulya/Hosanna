@@ -75,8 +75,9 @@ class CommunicationController extends Controller
                 
                 $count++;
             } elseif ($validated['channel'] === 'sms' && $recipient->phone) {
-                SmsService::send($recipient->phone, $validated['message']);
-                Log::info("SMS sent to {$recipient->phone}: {$validated['message']}");
+                $smsPayload = SmsService::wrapBroadcastMessage($validated['message']);
+                SmsService::send($recipient->phone, $smsPayload);
+                Log::info("SMS sent to {$recipient->phone}: {$smsPayload}");
                 
                 // Also save to inbox (only if member has a user account linked)
                 if ($recipient->user) {
@@ -88,5 +89,17 @@ class CommunicationController extends Controller
         }
 
         return back()->with('success', "Message queued for sending to {$count} recipients!");
+    }
+
+    /**
+     * Manually trigger Saturday reminder SMS to all active church members.
+     */
+    public function sendSaturdayReminderNow(Request $request)
+    {
+        \Illuminate\Support\Facades\Artisan::call('sms:saturday-reminder', ['--force' => true]);
+        $output = \Illuminate\Support\Facades\Artisan::output();
+        Log::info("Manual Saturday reminder triggered: " . $output);
+
+        return back()->with('success', 'Ujumbe wa mwaliko na ukumbusho wa Ibada ya Jumapili umeanza kutumwa kwa waumini wote!');
     }
 }

@@ -12,6 +12,9 @@ class MinistryPledgeController extends Controller
     public function index()
     {
         $user = auth()->user();
+        if ($user) {
+            $user->update(['last_viewed_projects_at' => now()]);
+        }
         $member = $user->member;
 
         if (!$member) {

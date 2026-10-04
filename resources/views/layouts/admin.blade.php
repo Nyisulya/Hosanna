@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manzese SDA Church - Management System</title>
+    <title>{{ $churchName ?? config('app.name', 'Hosanna International Church') }} - Management System</title>
     
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -13,6 +13,28 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <!-- TailwindCSS (for compatibility with existing views) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- NProgress for Ultra-Fast Zero-Refresh Transitions -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+    <script src="{{ asset('js/spa-engine.js') }}?v={{ time() }}"></script>
+    <style>
+        #nprogress .bar {
+            background: linear-gradient(90deg, #2563eb, #7c3aed, #ec4899) !important;
+            height: 3px !important;
+            box-shadow: 0 0 10px rgba(124, 58, 237, 0.7);
+            z-index: 99999 !important;
+        }
+        #nprogress .peg {
+            box-shadow: 0 0 10px #7c3aed, 0 0 5px #ec4899 !important;
+        }
+        .content-wrapper {
+            transition: opacity 0.12s ease-in-out;
+        }
+        .content-wrapper.spa-loading {
+            opacity: 0.75;
+            pointer-events: none;
+        }
+    </style>
     
     @livewireStyles
     @stack('styles')
@@ -97,7 +119,7 @@
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Header -->
     <div class="brand-link text-center" style="background:#1e3a8a; padding: 10px 10px; height: 57px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(255,255,255,0.15);">
-      <span class="brand-text font-weight-bold" style="color:white; font-size:12px; letter-spacing: 0.08em; text-transform: uppercase;">MANZESE SDA CHURCH</span>
+      <span class="brand-text font-weight-bold" style="color:white; font-size:12px; letter-spacing: 0.08em; text-transform: uppercase;">{{ $churchName ?? config('app.name', 'HOSANNA INTERNATIONAL CHURCH') }}</span>
     </div>
 
     <!-- Sidebar -->
@@ -106,9 +128,69 @@
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
+          @if(Auth::user()->hasRole('accountant') && !Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'treasurer', 'department_leader']))
+          {{-- ══════════════════════════════════════════════════════════ --}}
+          {{-- ACCOUNTANT (MHASIBU) — income & members only              --}}
+          {{-- ══════════════════════════════════════════════════════════ --}}
+          <li class="nav-header" style="letter-spacing:0.08em;font-size:0.68rem;color:rgba(255,255,255,0.45);padding:12px 15px 4px;text-transform:uppercase;">{{ __('Finance') }}</li>
+
+          <li class="nav-item">
+            <a href="{{ route('financial.dashboard') }}" class="nav-link {{ request()->routeIs('financial.dashboard') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-chart-line"></i>
+              <p>{{ __('Financial Dashboard') }}</p>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a href="{{ route('contributions.index') }}" class="nav-link {{ request()->routeIs('contributions.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-hand-holding-usd"></i>
+              <p>{{ __('Contributions') }}</p>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a href="{{ route('financial.income.create') }}" class="nav-link {{ request()->routeIs('financial.income.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-plus-circle"></i>
+              <p>{{ __('Record Income') }}</p>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a href="{{ route('financial.transactions') }}" class="nav-link {{ request()->routeIs('financial.transactions') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-list"></i>
+              <p>{{ __('All Transactions') }}</p>
+            </a>
+          </li>
+
+          <li class="nav-header" style="letter-spacing:0.08em;font-size:0.68rem;color:rgba(255,255,255,0.45);padding:12px 15px 4px;text-transform:uppercase;">{{ __('Members') }}</li>
+
+          <li class="nav-item">
+            <a href="{{ route('members.index') }}" class="nav-link {{ request()->routeIs('members.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-users"></i>
+              <p>{{ __('Members') }}</p>
+            </a>
+          </li>
+
+          <li class="nav-header" style="letter-spacing:0.08em;font-size:0.68rem;color:rgba(255,255,255,0.45);padding:12px 15px 4px;text-transform:uppercase;">{{ __('Account') }}</li>
+
+          <li class="nav-item">
+            <a href="{{ route('profile.index') }}" class="nav-link {{ request()->routeIs('profile.index') || request()->routeIs('profile.edit') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-user-circle"></i>
+              <p>{{ __('My Profile') }}</p>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a href="{{ route('profile.change-password.form') }}" class="nav-link {{ request()->routeIs('profile.change-password.form') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-key"></i>
+              <p>{{ __('Change Password') }}</p>
+            </a>
+          </li>
+          @else
+
           {{-- Personal — collapsible dropdown --}}
-          <li class="nav-item has-treeview {{ request()->routeIs('dashboard') || request()->routeIs('profile.*') || request()->routeIs('inbox.*') || request()->routeIs('attendance.*') || request()->routeIs('rosters.my') || request()->routeIs('care-requests.*') ? 'menu-open' : '' }}">
-            <a href="#" class="nav-link {{ request()->routeIs('dashboard') || request()->routeIs('profile.*') || request()->routeIs('inbox.*') || request()->routeIs('attendance.*') || request()->routeIs('rosters.my') || request()->routeIs('care-requests.*') ? 'active' : '' }}">
+          <li class="nav-item has-treeview {{ request()->routeIs('dashboard') || request()->routeIs('profile.*') || request()->routeIs('inbox.*') || request()->routeIs('attendance.*') || request()->routeIs('rosters.my') ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link {{ request()->routeIs('dashboard') || request()->routeIs('profile.*') || request()->routeIs('inbox.*') || request()->routeIs('attendance.*') || request()->routeIs('rosters.my') ? 'active' : '' }}">
               <i class="nav-icon fas fa-user-circle"></i>
               <p>
                 {{ __('Personal') }}
@@ -182,51 +264,6 @@
                 </a>
               </li>
 
-              {{-- Care Requests:
-                   - Viongozi (admin/pastor/dept_leader): dropdown na sub-items
-                   - Members: link moja ya moja kwa moja --}}
-              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader']))
-                {{-- Leaders see dropdown with My Requests + Leader Dashboard --}}
-                <li class="nav-item has-treeview {{ request()->routeIs('care-requests.*') ? 'menu-open' : '' }}">
-                  <a href="#" class="nav-link {{ request()->routeIs('care-requests.*') ? 'active' : '' }}">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>
-                      {{ __('Care Requests') }}
-                      <i class="right fas fa-angle-left"></i>
-                      @if(isset($pendingCareRequestCount) && $pendingCareRequestCount > 0)
-                        <span class="badge badge-warning right">{{ $pendingCareRequestCount }}</span>
-                      @endif
-                    </p>
-                  </a>
-                  <ul class="nav nav-treeview">
-                    <li class="nav-item">
-                      <a href="{{ route('care-requests.index') }}" class="nav-link {{ request()->routeIs('care-requests.index') ? 'active' : '' }}">
-                        <i class="far fa-dot-circle nav-icon"></i>
-                        <p>{{ __('My Requests') }}</p>
-                      </a>
-                    </li>
-                    <li class="nav-item">
-                      <a href="{{ route('care-requests.leader-dashboard') }}" class="nav-link {{ request()->routeIs('care-requests.leader-dashboard') || (request()->routeIs('care-requests.show') && Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader'])) ? 'active' : '' }}">
-                        <i class="far fa-dot-circle nav-icon"></i>
-                        <p>{{ __('Leader Dashboard') }}
-                          @if(isset($pendingCareRequestCount) && $pendingCareRequestCount > 0)
-                            <span class="badge badge-warning right">{{ $pendingCareRequestCount }}</span>
-                          @endif
-                        </p>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-              @else
-                {{-- Members see a single direct link --}}
-                <li class="nav-item">
-                  <a href="{{ route('care-requests.index') }}" class="nav-link {{ request()->routeIs('care-requests.*') ? 'active' : '' }}">
-                    <i class="far fa-circle nav-icon"></i>
-                    <p>{{ __('Care Requests') }}</p>
-                  </a>
-                </li>
-              @endif
-
             </ul>
           </li>
 
@@ -252,48 +289,12 @@
             </a>
           </li>
 
-          {{-- Events & Calendar --}}
-          <li class="nav-item has-treeview {{ request()->routeIs('events.*') || request()->routeIs('reports.calendar') || request()->routeIs('birthdays.*') || request()->routeIs('anniversaries.*') ? 'menu-open' : '' }}">
-            <a href="#" class="nav-link {{ request()->routeIs('events.*') || request()->routeIs('reports.calendar') || request()->routeIs('birthdays.*') || request()->routeIs('anniversaries.*') ? 'active' : '' }}">
+          {{-- Matukio (Events Only) --}}
+          <li class="nav-item">
+            <a href="{{ route('events.index') }}" class="nav-link {{ request()->routeIs('events.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-calendar-alt"></i>
-              <p>
-                {{ __('Events & Calendar') }}
-                <i class="right fas fa-angle-left"></i>
-                @if(isset($birthdayCount) && $birthdayCount > 0)
-                  <span class="badge badge-info right">{{ $birthdayCount }}</span>
-                @endif
-              </p>
+              <p>{{ __('Matukio') }}</p>
             </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="{{ route('events.index') }}" class="nav-link {{ request()->routeIs('events.*') ? 'active' : '' }}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>{{ __('Events') }}</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{{ route('reports.calendar') }}" class="nav-link {{ request()->routeIs('reports.calendar') ? 'active' : '' }}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>{{ __('Calendar') }}</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{{ route('birthdays.index') }}" class="nav-link {{ request()->routeIs('birthdays.*') ? 'active' : '' }}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>{{ __('Birthdays') }}
-                    @if(isset($birthdayCount) && $birthdayCount > 0)
-                      <span class="badge badge-info right">{{ $birthdayCount }}</span>
-                    @endif
-                  </p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{{ route('anniversaries.index') }}" class="nav-link {{ request()->routeIs('anniversaries.*') ? 'active' : '' }}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>{{ __('Anniversaries') }}</p>
-                </a>
-              </li>
-            </ul>
           </li>
 
           {{-- Ministries --}}
@@ -308,12 +309,12 @@
             </a>
           </li>
 
-          {{-- Small Groups --}}
-          <li class="nav-item has-treeview {{ request()->routeIs('small-groups.*') ? 'menu-open' : '' }}">
-            <a href="#" class="nav-link {{ request()->routeIs('small-groups.*') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-user-friends"></i>
+          {{-- Zone / Kanda --}}
+          <li class="nav-item has-treeview {{ request()->routeIs('small-groups.*') || request()->routeIs('zones.*') ? 'menu-open' : '' }}">
+            <a href="#" class="nav-link {{ request()->routeIs('small-groups.*') || request()->routeIs('zones.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-map-marked-alt"></i>
               <p>
-                {{ __('Small Groups') }}
+                {{ __('Zone / Kanda') }}
                 <i class="right fas fa-angle-left"></i>
               </p>
             </a>
@@ -321,38 +322,29 @@
               <li class="nav-item">
                 <a href="{{ route('small-groups.my-group') }}" class="nav-link {{ request()->routeIs('small-groups.my-group') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>{{ __('My Small Group') }}</p>
+                  <p>{{ __('Zone Yangu') }}</p>
                 </a>
               </li>
-              @if(Auth::user()->member && \App\Models\SmallGroup::where('leader_id', Auth::user()->member->id)->exists())
+              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'Super Admin', 'Admin', 'Pastor']) || (Auth::user()->member && \App\Models\SmallGroup::where('leader_id', Auth::user()->member->id)->exists()))
               <li class="nav-item">
-                <a href="{{ route('small-groups.attendance') }}" class="nav-link {{ request()->routeIs('small-groups.attendance') ? 'active' : '' }}">
+                <a href="{{ route('small-groups.attendance') }}" class="nav-link {{ request()->routeIs('small-groups.attendance') || request()->routeIs('small-groups.meetings.*') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>{{ __('Kanda Attendance') }}</p>
+                  <p>{{ __('Mahudhurio ya Zone') }}</p>
                 </a>
               </li>
               @endif
-              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor']))
+              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'Super Admin', 'Admin', 'Pastor']))
               <li class="nav-item">
                 <a href="{{ route('small-groups.index') }}" class="nav-link {{ request()->routeIs('small-groups.index') || request()->routeIs('small-groups.show') || request()->routeIs('small-groups.create') || request()->routeIs('small-groups.edit') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>{{ __('Manage Groups') }}</p>
+                  <p>{{ __('Simamia Zone') }}</p>
                 </a>
               </li>
               @endif
             </ul>
           </li>
 
-          {{-- Weekly Reports --}}
-          <li class="nav-item">
-            <a href="{{ route('weekly-reports.index') }}" class="nav-link {{ request()->routeIs('weekly-reports.*') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-file-invoice"></i>
-              <p>{{ __('Weekly Reports') }}</p>
-            </a>
-          </li>
 
-
-          {{-- Giving & Finance — single dropdown --}}
           <li class="nav-item has-treeview {{ request()->routeIs('give.*') || request()->routeIs('contributions.*') || request()->routeIs('pledges.*') || request()->routeIs('ministry-pledges.*') || request()->routeIs('projects.*') || request()->routeIs('financial.*') || request()->routeIs('giving-categories.*') ? 'menu-open' : '' }}">
             <a href="#" class="nav-link {{ request()->routeIs('give.*') || request()->routeIs('contributions.*') || request()->routeIs('pledges.*') || request()->routeIs('ministry-pledges.*') || request()->routeIs('projects.*') || request()->routeIs('financial.*') || request()->routeIs('giving-categories.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-hand-holding-usd"></i>
@@ -360,7 +352,7 @@
                 {{ __('Giving & Finance') }}
                 <i class="right fas fa-angle-left"></i>
                 @if(isset($newProjectCount) && $newProjectCount > 0)
-                  <span class="badge badge-success right">{{ $newProjectCount }}</span>
+                  <span class="badge badge-success right new-project-badge">{{ $newProjectCount }}</span>
                 @endif
               </p>
             </a>
@@ -383,14 +375,14 @@
                   <i class="far fa-circle nav-icon"></i>
                   <p>{{ __('Ahadi & Miradi') }}
                     @if(isset($newProjectCount) && $newProjectCount > 0)
-                      <span class="badge badge-success right">{{ $newProjectCount }}</span>
+                      <span class="badge badge-success right new-project-badge">{{ $newProjectCount }}</span>
                     @endif
                   </p>
                 </a>
               </li>
 
-              {{-- Admin/Treasurer only --}}
-              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'treasurer']))
+              {{-- Financial Dashboard and Transactions: Pastor, Admin, Treasurer can view --}}
+              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'treasurer', 'accountant']))
               <li class="nav-item">
                 <a href="{{ route('financial.dashboard') }}" class="nav-link {{ request()->routeIs('financial.dashboard') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon"></i>
@@ -403,6 +395,10 @@
                   <p>{{ __('All Transactions') }}</p>
                 </a>
               </li>
+              @endif
+
+              {{-- Record Income, Record Expense, Manage Categories: ONLY Treasurer, Accountant, Admin (NOT Pastor) --}}
+              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'treasurer', 'accountant']) && (!Auth::user()->hasRole('pastor') || Auth::user()->hasRole('super_admin')))
               <li class="nav-item">
                 <a href="{{ route('financial.income.create') }}" class="nav-link {{ request()->routeIs('financial.income.create') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon text-success"></i>
@@ -448,11 +444,11 @@
           </li>
           @endcan
 
-          {{-- Attendance (Admin) --}}
-          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader']))
+          {{-- Attendance (Admin / Pastor / Leaders) --}}
+          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader']) || \App\Models\SmallGroup::where('leader_id', Auth::id())->exists())
           <li class="nav-item has-treeview {{ request()->routeIs('attendance.*') ? 'menu-open' : '' }}">
             <a href="#" class="nav-link {{ request()->routeIs('attendance.*') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-qrcode"></i>
+              <i class="nav-icon fas fa-clipboard-check"></i>
               <p>
                 {{ __('Attendance') }}
                 <i class="right fas fa-angle-left"></i>
@@ -460,30 +456,24 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="{{ route('attendance.scanner') }}" class="nav-link {{ request()->routeIs('attendance.scanner') || request()->routeIs('attendance.scan') ? 'active' : '' }}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>{{ __('QR Scanner') }}</p>
+                <a href="{{ route('attendance.index') }}" class="nav-link {{ request()->routeIs('attendance.index') ? 'active' : '' }}">
+                  <i class="fas fa-chart-pie nav-icon text-info"></i>
+                  <p>{{ __('Attendance Dashboard') }}</p>
                 </a>
               </li>
+              {{-- Rekodi Mahudhurio (Manual by Deacons / Ushers / Admin) --}}
+              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'department_leader']) && (!Auth::user()->hasRole('pastor') || Auth::user()->hasRole('super_admin')))
               <li class="nav-item">
-                <a href="{{ route('attendance.index') }}" class="nav-link {{ request()->routeIs('attendance.index') || request()->routeIs('attendance.show') ? 'active' : '' }}">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>{{ __('Records') }}</p>
+                <a href="{{ route('attendance.record') }}" class="nav-link {{ request()->routeIs('attendance.record') || request()->routeIs('attendance.show') ? 'active' : '' }}">
+                  <i class="fas fa-user-check nav-icon text-success"></i>
+                  <p>{{ __('Record Attendance') }}</p>
                 </a>
               </li>
+              @endif
             </ul>
           </li>
           @endif
 
-          {{-- Pastoral Care --}}
-          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor']))
-          <li class="nav-item">
-            <a href="{{ route('pastoral-care.dashboard') }}" class="nav-link {{ request()->routeIs('pastoral-care.*') ? 'active' : '' }}">
-              <i class="nav-icon fas fa-heart"></i>
-              <p>{{ __('Pastoral Care') }}</p>
-            </a>
-          </li>
-          @endif
 
           {{-- Communication --}}
           @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader']))
@@ -563,6 +553,8 @@
           @endif
           @endif
 
+          @endif {{-- end accountant menu guard --}}
+
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -577,7 +569,39 @@
       <div class="container-fluid">
         @if (session('status'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('status') }}
+                <i class="fas fa-check-circle mr-2"></i> {{ session('status') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle mr-2"></i> {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong><i class="fas fa-exclamation-circle mr-2"></i> Kuna makosa yafuatayo yaliyojitokeza:</strong>
+                <ul class="mb-0 mt-2 pl-3">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -597,7 +621,7 @@
     <div class="float-right d-none d-sm-inline">
       Version 1.0
     </div>
-    <strong>Copyright &copy; {{ date('Y') }} Manzese Seventh Day Adventist Church.</strong> All rights reserved.
+    <strong>Copyright &copy; {{ date('Y') }} {{ $churchName ?? config('app.name', 'Hosanna International Church') }}.</strong> All rights reserved.
   </footer>
 </div>
 <!-- ./wrapper -->
@@ -608,6 +632,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 @livewireScripts
 {{-- Birthday Celebration Modal --}}
@@ -847,6 +872,10 @@
             confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInOut(0.7, 0.9), y: Math.random() - 0.2 } }));
         }, 250);
     }
+
+    $(document).on('click', 'a[href*="pledges"], a[href*="projects"], .new-project-badge', function() {
+        $('.new-project-badge').fadeOut(200);
+    });
 </script>
 
 @stack('scripts')

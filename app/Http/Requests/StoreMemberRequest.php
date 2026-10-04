@@ -11,7 +11,7 @@ class StoreMemberRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // Allow any authenticated user; policy will handle permissions
+        return true;
     }
 
     /**
@@ -22,22 +22,37 @@ class StoreMemberRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'full_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:members,email'],
-            'password' => ['required', 'string', 'min:8'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'gender' => ['required', 'in:male,female,other'],
-            'date_of_birth' => ['required', 'date'],
-            'marital_status' => ['required', 'in:single,married,widowed,divorced'],
-            'address' => ['nullable', 'string'],
-            'salvation_date' => ['nullable', 'date'],
-            'baptism_date' => ['nullable', 'date'],
-            'profile_photo' => ['nullable', 'image', 'max:2048'],
-            'emergency_contact_name' => ['nullable', 'string', 'max:255'],
-            'emergency_contact_phone' => ['nullable', 'string', 'max:20'],
-            'registration_type' => ['nullable', 'string', 'max:255'],
-            'departments' => ['nullable', 'array'],
-            'departments.*' => ['exists:departments,id'],
+            'full_name'                 => ['required', 'string', 'max:255'],
+            'email'                     => ['nullable', 'email', 'max:255', 'unique:members,email', 'unique:users,email'],
+            'password'                  => ['nullable', 'string', 'min:6'],
+            'member_type'               => ['nullable', 'string', 'in:member,pastor,department_leader,accountant,treasurer,admin'],
+            'phone'                     => ['nullable', 'string', 'max:20'],
+            'gender'                    => ['nullable', 'in:male,female,other'],
+            'date_of_birth'             => ['nullable', 'date'],
+            'marital_status'            => ['nullable', 'in:single,married,widowed,divorced'],
+            'address'                   => ['nullable', 'string'],
+            'salvation_date'            => ['nullable', 'date'],
+            'baptism_date'              => ['nullable', 'date'],
+            'profile_photo'             => ['nullable', 'image', 'max:2048'],
+            'emergency_contact_name'    => ['nullable', 'string', 'max:255'],
+            'emergency_contact_phone'   => ['nullable', 'string', 'max:20'],
+            'registration_type'         => ['nullable', 'string', 'max:255'],
+            'status'                    => ['nullable', 'in:active,inactive,pending'],
+            'departments'               => ['nullable', 'array'],
+            'departments.*'             => ['exists:departments,id'],
+        ];
+    }
+
+    /**
+     * Custom validation messages
+     */
+    public function messages(): array
+    {
+        return [
+            'full_name.required' => 'Jina kamili la mshiriki linahitajika.',
+            'email.unique'       => 'Barua pepe hii tayari inatumiwa na mshiriki mwingine au mtumiaji wa mfumo.',
+            'email.email'        => 'Tafadhali ingiza barua pepe iliyo sahihi.',
+            'password.min'       => 'Nenosiri linapaswa kuwa na herufi zisizopungua 6.',
         ];
     }
 }

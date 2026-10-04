@@ -74,21 +74,6 @@
                 <span class="text-purple-600 hover:underline text-sm">View Report →</span>
             </div>
         </a>
-
-        <a href="{{ route('reports.pastoral-care') }}" class="bg-white shadow rounded p-6 hover:shadow-lg transition">
-            <div class="flex items-center mb-4">
-                <div class="bg-pink-100 p-3 rounded-full mr-4">
-                    <span class="text-2xl">🙏</span>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-lg">Pastoral Care Reports</h3>
-                    <p class="text-sm text-gray-600">Visits, follow-ups, prayers</p>
-                </div>
-            </div>
-            <div class="text-right">
-                <span class="text-pink-600 hover:underline text-sm">View Report →</span>
-            </div>
-        </a>
     </div>
 </div>
 @endsection

@@ -209,15 +209,6 @@
                         <i class="fab fa-whatsapp mr-2"></i> {{ __('Chat on WhatsApp') }}
                     </a>
                     @endif
-                    <a href="{{ route('pastoral-care.visits') }}?member_id={{ $member->id }}" class="block w-full text-center bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 text-sm">
-                        {{ __('Log Visit') }}
-                    </a>
-                    <a href="{{ route('pastoral-care.follow-ups') }}?member_id={{ $member->id }}" class="block w-full text-center bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm">
-                        {{ __('Create Follow-up') }}
-                    </a>
-                    <a href="{{ route('pastoral-care.prayers') }}?member_id={{ $member->id }}" class="block w-full text-center bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 text-sm">
-                        {{ __('Add Prayer Request') }}
-                    </a>
                 </div>
             </div>
         </div>

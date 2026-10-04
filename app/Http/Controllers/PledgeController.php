@@ -13,6 +13,9 @@ class PledgeController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+        if ($user) {
+            $user->update(['last_viewed_projects_at' => now()]);
+        }
         $query = Pledge::with(['member', 'payments']);
 
         // Members see only their own pledges
@@ -204,7 +207,13 @@ class PledgeController extends Controller
             } catch (\Exception $e) {
                 $dateStr = date('d/m/Y');
             }
-            $message = "Bwana asifiwe " . $member->full_name . "! Tumepokea Shs " . number_format($validated['amount']) . " kwa ajili ya ahadi yako ya \"" . $pledge->purpose . "\". Salio lililobaki ni Shs " . number_format($remainingBalance) . ". Mungu akubariki!";
+            $message = \App\Services\SmsService::buildPledgePaymentMessage(
+                $member->full_name,
+                $pledge->purpose,
+                $validated['amount'],
+                $remainingBalance,
+                $dateStr
+            );
             
             try {
                 \App\Services\SmsService::send($member->phone, $message);

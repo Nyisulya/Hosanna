@@ -85,11 +85,10 @@ graph TD
 ### 🏥 G. Huduma za Kichungaji na Wageni (Pastoral Care & Visitors)
 *   **Wageni (Visitor Tracking):** Kusajili wageni wote wanaotembelea kanisa, kurekodi jinsi walivyopata taarifa za kanisa, na kuwagawa kwa waumini maalum kwa ajili ya ufuatiliaji (Follow-up).
 *   **Ziara za Kichungaji (Visits):** Kurekodi kumbukumbu za ziara za kichungaji zilizofanywa kwa waumini (visiting sick, counseling, n.k.).
-*   **Care Requests:** Mfumo unaoruhusu mwanachama yeyote kuomba msaada wa kichungaji au kiroho (k.m. kuombewa, kutembelewa akiwa mgonjwa). Viongozi wanapokea maombi haya kwenye jopo lao la uongozi na kuyajibu.
 
 ### 📅 H. Vipengele Vingine (Other Modules)
 *   **Matangazo (Announcements):** Matangazo ya kanisa yanayowekwa na admin na kuonekana kwenye dashboard ya kila mwanachama.
-*   **Roster (Zamu za Huduma):** Kupanga na kuonyesha zamu za huduma (k.m. Nani anahubiri, nani anasoma somo, usafi, n.k.) kwa kila Sabato.
+*   **Roster (Zamu za Huduma):** Kupanga na kuonyesha zamu za huduma (k.m. Nani anahubiri, nani anasoma somo, usafi, n.k.) kwa kila Jumapili.
 *   **Maktaba (Library):** Usimamizi wa vitabu (hasa vya Roho ya Unabii) vinavyomilikiwa na kanisa.
 *   **Prayer Wall (Ukuta wa Maombi):** Mahali pa kuweka maombi ya kanisa ambapo waumini wanaweza kuona na kubonyeza "Pray" ili kuonyesha wanawaombea, na kuweka alama ya "Answered" pale maombi yanapojibiwa.
 *   **Assets (Mali za Kanisa):** Orodha na usimamizi wa mali zote za kanisa (vifaa vya mziki, viti, ardhi, n.k.).

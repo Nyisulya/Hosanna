@@ -46,4 +46,19 @@ return [
         'api_key' => env('SMS_GATEWAY_API_KEY'),
     ],
 
+    'sms_gate' => [
+        'server_url' => env('SMS_GATE_SERVER_URL', 'https://api.sms-gate.app'),
+        'username' => env('SMS_GATE_USERNAME'),
+        'password' => env('SMS_GATE_PASSWORD'),
+        'device_id' => env('SMS_GATE_DEVICE_ID'),
+        'sim_number' => env('SMS_GATE_SIM_NUMBER', 1),
+    ],
+
+    'payment_gateway' => env('PAYMENT_GATEWAY', 'harakapay'),
+
+    'harakapay' => [
+        'api_key' => env('HARAKAPAY_API_KEY'),
+        'base_url' => env('HARAKAPAY_BASE_URL', 'https://harakapay.net'),
+    ],
+
 ];

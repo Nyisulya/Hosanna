@@ -38,7 +38,7 @@ Mfumo huu unaruhusu utambuzi na uwekaji wa mahudhurio ya washiriki kwa kutumia k
 * **Ukurasa wa Matokeo (Scan Result):** Ukurasa huu unajitegemea (Standalone) ili kuzuia error za `unreadNotifications on null` zinazotokea kwa watumiaji ambao hawajaingia kwenye mfumo.
 
 ### C. Uchaguzi wa Matukio (Event Selector)
-* Kama kuna matukio au ibada zaidi ya moja kwa siku hiyo, mfumo utamwambia mhudumu achague tukio husika (k.m. *Ibada ya Kwanza* au *Shule ya Sabato*) **kwa skana ya kwanza tu**.
+* Kama kuna matukio au ibada zaidi ya moja kwa siku hiyo, mfumo utamwambia mhudumu achague tukio husika (k.m. *Ibada ya Kwanza* au *Shule ya Jumapili (Sunday School)*) **kwa skana ya kwanza tu**.
 * Mfumo utakariri tukio hilo (Session-based cache) kwa skana zote zinazofuata ili mhudumu asilazimike kuchagua kila wakati.
 
 ---

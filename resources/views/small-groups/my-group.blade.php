@@ -90,55 +90,131 @@
             @endphp
 
             @if($isLeader || $isCoLeader)
-            <div class="card bg-info text-white mb-3">
-                <div class="card-body text-center">
-                    <h5 class="card-title">👑 Leader Tools</h5>
-                    <p class="mb-3">Manage your small group reports</p>
-                    <a href="{{ route('weekly-reports.leader-dashboard') }}" class="btn btn-light btn-block">
-                        <i class="fas fa-tachometer-alt"></i> Open Leader Dashboard
-                    </a>
+            <div class="card card-outline card-info shadow-sm mb-3">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0 font-weight-bold">
+                        <i class="fas fa-crown"></i> Uongozi wa Kanda (Leader Tools)
+                    </h5>
+                </div>
+                <div class="card-body p-3">
+                    <button type="button" class="btn btn-success btn-block font-weight-bold" data-toggle="modal" data-target="#scheduleMeetingModal">
+                        <i class="far fa-calendar-plus"></i> Rekodi Ratiba ya Ibada
+                    </button>
                 </div>
             </div>
             @endif
 
-            <!-- Weekly Report Call to Action -->
-            <div class="card bg-gradient-primary text-white mb-3">
-                <div class="card-body text-center">
-                    <h5 class="card-title">📝 Weekly Report</h5>
-                    <p class="mb-3">Submit your weekly spiritual activities report</p>
-                    <a href="{{ route('weekly-reports.create') }}" class="btn btn-light btn-block">
-                        <i class="fas fa-paper-plane"></i> Submit This Week's Report
-                    </a>
-                    <a href="{{ route('weekly-reports.index') }}" class="btn btn-outline-light btn-block mt-2">
-                        <i class="fas fa-history"></i> View My Reports
-                    </a>
+            <!-- Recent Meetings -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h3 class="card-title font-weight-bold mb-0">
+                        <i class="fas fa-calendar-alt text-primary mr-1"></i> Ibada za Kanda (Meetings)
+                    </h3>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        @forelse($group->meetings->sortByDesc('meeting_date')->take(5) as $meeting)
+                        <li class="list-group-item p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <div>
+                                    <strong class="text-dark">
+                                        <i class="far fa-calendar-check text-success"></i> 
+                                        {{ \Carbon\Carbon::parse($meeting->meeting_date)->format('d M Y, H:i') }}
+                                    </strong>
+                                    @if(\Carbon\Carbon::parse($meeting->meeting_date)->isFuture())
+                                        <span class="badge badge-warning ml-1">Ijayo</span>
+                                    @else
+                                        <span class="badge badge-light border ml-1">Ilikwisha</span>
+                                    @endif
+                                </div>
+                                <span class="badge badge-info">
+                                    {{ $meeting->attendees_count }} Walikuwepo
+                                </span>
+                            </div>
+
+                            @if($meeting->topic)
+                            <div class="small font-weight-bold text-dark mt-1">
+                                <i class="fas fa-book-open text-muted mr-1"></i> {{ $meeting->topic }}
+                            </div>
+                            @endif
+
+                            <div class="small text-muted mb-2">
+                                <i class="fas fa-map-marker-alt text-danger mr-1"></i> {{ $meeting->location ?: ($group->location ?: 'Kanisani') }}
+                            </div>
+
+                            @if($isLeader || $isCoLeader)
+                            <div class="d-flex flex-wrap gap-2 mt-2 pt-2 border-top">
+                                <a href="{{ route('small-groups.meetings.attendance', $meeting) }}" class="btn btn-xs btn-primary mr-1 mb-1 font-weight-bold">
+                                    <i class="fas fa-clipboard-check"></i> Itisha Majina / Mahudhurio
+                                </a>
+
+                                <form action="{{ route('small-groups.meetings.send-reminder', $meeting) }}" method="POST" class="d-inline mb-1" onsubmit="return confirm('Tuma SMS za mwaliko wa ibada hii kwa wanakanda wote?')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-xs btn-outline-warning">
+                                        <i class="fas fa-bell"></i> 
+                                        {{ $meeting->reminder_sent_at ? 'Tuma Mwaliko Tena' : 'Kumbusha (SMS)' }}
+                                    </button>
+                                </form>
+                            </div>
+
+                            @if($meeting->reminder_sent_at)
+                            <div class="small text-success mt-1" style="font-size: 0.75rem;">
+                                <i class="fas fa-check"></i> Mwaliko ulitumwa: {{ $meeting->reminder_sent_at->format('d/m H:i') }}
+                            </div>
+                            @endif
+                            @endif
+                        </li>
+                        @empty
+                        <li class="list-group-item text-center p-3 text-muted">
+                            Hakuna ibada zilizorekodiwa bado.
+                        </li>
+                        @endforelse
+                    </ul>
                 </div>
             </div>
 
-            <!-- Recent Meetings -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Recent Meetings</h3>
-                </div>
-                <div class="card-body p-0">
-                    <table class="table table-sm">
-                        <tbody>
-                            @forelse($group->meetings->take(5) as $meeting)
-                            <tr>
-                                <td>
-                                    <strong>{{ $meeting->meeting_date->format('M d') }}</strong><br>
-                                    <small>{{ $meeting->topic }}</small>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td class="text-center">No meetings yet</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+            <!-- Modal for scheduling meeting -->
+            @if($isLeader || $isCoLeader)
+            <div class="modal fade" id="scheduleMeetingModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title font-weight-bold">
+                                <i class="far fa-calendar-plus mr-1"></i> Rekodi Ratiba ya Ibada ya Kanda
+                            </h5>
+                            <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                        </div>
+                        <form action="{{ route('small-groups.store-meeting', $group) }}" method="POST">
+                            @csrf
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label class="font-weight-semibold">Tarehe na Saa ya Ibada *</label>
+                                    <input type="datetime-local" name="meeting_date" class="form-control" value="{{ now()->addDay()->format('Y-m-d\T17:00') }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="font-weight-semibold">Mahali / Mwenyeji wa Ibada</label>
+                                    <input type="text" name="location" class="form-control" placeholder="Mf: Kwa Mzee Petro au Kanisani" value="{{ $group->location }}">
+                                </div>
+                                <div class="form-group">
+                                    <label class="font-weight-semibold">Mada ya Ibada (Topic)</label>
+                                    <input type="text" name="topic" class="form-control" placeholder="Mf: Ushirika na Upendo">
+                                </div>
+                                <div class="form-group">
+                                    <label class="font-weight-semibold">Maelezo ya Ziada (Notes)</label>
+                                    <textarea name="notes" class="form-control" rows="2" placeholder="Ujumbe mfupi..."></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer bg-light">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Funga</button>
+                                <button type="submit" class="btn btn-success font-weight-bold">
+                                    <i class="fas fa-save mr-1"></i> Hifadhi Ratiba
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
+            @endif
         </div>
     </div>
     @else

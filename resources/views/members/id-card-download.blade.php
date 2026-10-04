@@ -336,7 +336,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            www.manzesesdachurch.org
+            www.hosannachurch.org
         </div>
     </div>
 </body>

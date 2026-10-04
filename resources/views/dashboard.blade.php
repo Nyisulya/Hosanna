@@ -139,13 +139,13 @@
         <p class="text-sm font-medium text-gray-700">{{ __('Members') }}</p>
     </a>
 
-    <a href="{{ route('attendance.scanner') }}" class="bg-white shadow rounded-lg p-6 hover:shadow-lg transition text-center">
+    <a href="{{ route('attendance.record') }}" class="bg-white shadow rounded-lg p-6 hover:shadow-lg transition text-center">
         <div class="text-green-600 mb-2">
             <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
             </svg>
         </div>
-        <p class="text-sm font-medium text-gray-700">{{ __('Scan Attendance') }}</p>
+        <p class="text-sm font-medium text-gray-700">{{ __('Record Attendance') }}</p>
     </a>
 
     <a href="{{ route('events.index') }}" class="bg-white shadow rounded-lg p-6 hover:shadow-lg transition text-center">
@@ -166,14 +166,6 @@
         <p class="text-sm font-medium text-gray-700">{{ __('Financial') }}</p>
     </a>
 
-    <a href="{{ route('pastoral-care.dashboard') }}" class="bg-white shadow rounded-lg p-6 hover:shadow-lg transition text-center">
-        <div class="text-pink-600 mb-2">
-            <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-            </svg>
-        </div>
-        <p class="text-sm font-medium text-gray-700">{{ __('Pastoral Care') }}</p>
-    </a>
 
     <a href="{{ route('reports.dashboard') }}" class="bg-white shadow rounded-lg p-6 hover:shadow-lg transition text-center">
         <div class="text-orange-600 mb-2">

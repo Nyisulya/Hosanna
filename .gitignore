@@ -7,6 +7,8 @@
 /storage/pail
 /vendor
 .env
+.env.*
+!.env.example
 .env.backup
 .env.production
 .phpactor.json
@@ -21,3 +23,30 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Database & SQLite files
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.db
+database/*.sqlite*
+hosanna_church_db*
+
+# Local configuration & environment overrides
+php.ini
+server.php
+composer.phar
+
+# Local test & utility scripts
+test_*.php
+test_*.txt
+assign_admin.php
+check_roles.php
+drop_members_table.php
+fix_passwords.php
+link_admin_member.php
+reset_*.php
+update_user.php
+create_superadmin.php
+create_accountant.php

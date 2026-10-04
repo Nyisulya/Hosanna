@@ -37,50 +37,64 @@ class ChurchDemoSeeder extends Seeder
         // ──────────────────────────────────────
         $this->command->info('👤 Inaunda watumiaji...');
 
-        $superAdmin = User::updateOrCreate(['email' => 'admin@manzesesda.com'], [
+        $superAdmin = User::updateOrCreate(['email' => 'admin@hosannachurch.org'], [
             'name' => 'Super Admin',
             'password' => Hash::make('Admin@2025!'),
             'email_verified_at' => now(),
         ]);
         $superAdmin->syncRoles(['super_admin']);
 
-        $pastor = User::updateOrCreate(['email' => 'mchungaji@manzesesda.com'], [
+        $pastor = User::updateOrCreate(['email' => 'mchungaji@hosannachurch.org'], [
             'name' => 'Mch. Emmanuel Kileo',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
         $pastor->syncRoles(['pastor']);
 
-        $treasurer = User::updateOrCreate(['email' => 'hazina@manzesesda.com'], [
+        $treasurer = User::updateOrCreate(['email' => 'hazina@hosannachurch.org'], [
             'name' => 'Dorcas Mwanga',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
         $treasurer->syncRoles(['treasurer']);
 
-        $admin = User::updateOrCreate(['email' => 'msimamizi@manzesesda.com'], [
+        $admin = User::updateOrCreate(['email' => 'msimamizi@hosannachurch.org'], [
             'name' => 'Samuel Kagera',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
         $admin->syncRoles(['admin']);
 
+        $accountant = User::updateOrCreate(['email' => 'accountant@hosannachurch.org'], [
+            'name' => 'Mhasibu Kanisa',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+        $accountant->syncRoles(['accountant']);
+
+        $regularMember = User::updateOrCreate(['email' => 'mwanachama@hosannachurch.org'], [
+            'name' => 'Grace Mhina',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+        ]);
+        $regularMember->syncRoles(['member']);
+
         // ──────────────────────────────────────
         // 3. IDARA (Departments)
         // ──────────────────────────────────────
-        $this->command->info('🏛️  Inaunda idara...');
+        $this->command->info('🏛️  Inaunda idara za kanisa...');
 
         $deptData = [
-            ['Ibada na Muziki',                  'Huduma za muziki, kwaya, na ibada ya Sabato'],
-            ['Vijana (AY)',                       'Jumuiya ya Vijana wa Adventista - shughuli na michezo ya kiroho'],
-            ['Watoto (Pathfinder)',               'Mpango wa Pathfinder na Adventurer kwa watoto'],
-            ['Elimu ya Biblia (Sabbath School)',  'Masomo ya kila Sabato asubuhi kwa makundi yote'],
-            ['Utumishi wa Jamii (ADRA)',          'Shughuli za kusaidia jamii - chakula, elimu, afya'],
-            ['Mawasiliano na Sanaa',              'Picha, video, tovuti, na matangazo ya kanisa'],
-            ['Uinjilisti',                        'Kampeni za injili, kugawana neno, na kufikia wengine'],
-            ['Afya na Lishe',                     'Maonyesho ya afya, masomo ya lishe ya Kikristo'],
-            ['Familia na Ndoa',                   'Ushauri wa ndoa, semina za familia, na mama na mtoto'],
-            ['Wazee (Senior Ministry)',           'Shughuli maalum kwa wazee wa kanisa'],
+            ['Vijana (Youth Fellowship)',                'Jumuiya ya Vijana - Hosanna Youth Fellowship'],
+            ['Shule ya Jumapili (Sunday School / Watoto)', 'Huduma ya watoto na Shule ya Jumapili (Sunday School)'],
+            ['Wanawake wa Kristo (WWK)',                 'Idara ya Wanawake wa Kristo (WWK) - maombi, mafundisho na huduma'],
+            ['Wanaume wa Kiume (WKM)',                   'Idara ya Wanaume wa Kiume (WKM) - uongozi wa familia na huduma za kiroho'],
+            ['Misheni na Uinjilisti',                    'Shughuli za uinjilisti, misheni, na upandaji makanisa'],
+            ['Ibada na Muziki',                          'Huduma za muziki, kwaya, na ibada ya Jumapili'],
+            ['Mawasiliano na Vyombo vya Habari',         'Picha, video, tovuti, na matangazo ya kanisa'],
+            ['Maombi na Maombezi',                       'Huduma ya maombi, maombezi na mikesha ya kiroho'],
+            ['Familia na Ndoa',                          'Ushauri wa ndoa, semina za familia, na malezi ya Kikristo'],
+            ['Wazee wa Kanisa na Mashemasi',             'Shughuli maalum na uongozi wa wazee na mashemasi wa kanisa'],
         ];
 
         $departments = [];
@@ -94,10 +108,10 @@ class ChurchDemoSeeder extends Seeder
         $this->command->info('👥 Inaunda wanachama 60...');
 
         $membersRawData = [
-            ['Emmanuel Kileo',       'male',   '1975-03-12', 'mchungaji@manzesesda.com',       '0754001001', 'married',  'Manzese Shule',        '2000-04-15'],
-            ['Dorcas Mwanga',        'female', '1982-09-18', 'hazina@manzesesda.com',           '0754001002', 'married',  'Manzese Kwa Mtogole',  '2001-08-20'],
-            ['Samuel Kagera',        'male',   '1988-07-04', 'msimamizi@manzesesda.com',        '0754001003', 'married',  'Sinza',                '2003-01-10'],
-            ['Grace Mhina',          'female', '1990-11-25', 'grace.mhina@gmail.com',          '0754001004', 'single',   'Manzese Makorora',     '2005-03-22'],
+            ['Emmanuel Kileo',       'male',   '1975-03-12', 'mchungaji@hosannachurch.org',   '0754001001', 'married',  'Mwenge Shule',         '2000-04-15'],
+            ['Dorcas Mwanga',        'female', '1982-09-18', 'hazina@hosannachurch.org',       '0754001002', 'married',  'Kijitonyama',          '2001-08-20'],
+            ['Samuel Kagera',        'male',   '1988-07-04', 'msimamizi@hosannachurch.org',    '0754001003', 'married',  'Sinza',                '2003-01-10'],
+            ['Grace Mhina',          'female', '1990-11-25', 'mwanachama@hosannachurch.org',   '0754001004', 'single',   'Manzese Makorora',     '2005-03-22'],
             ['Peter Lusambo',        'male',   '1985-06-30', 'peter.lusambo@gmail.com',        '0754001005', 'married',  'Manzese Ward 3',       '1999-12-01'],
             ['Ruth Shillingi',       'female', '1993-04-17', 'ruth.shillingi@gmail.com',       '0754001006', 'single',   'Tandale',              '2010-07-14'],
             ['Amos Ndunguru',        'male',   '1978-02-08', 'amos.ndunguru@gmail.com',        '0754001007', 'married',  'Manzese Kivule',       '1996-09-30'],
@@ -226,17 +240,16 @@ class ChurchDemoSeeder extends Seeder
         // ──────────────────────────────────────
         // 6. GIVING CATEGORIES
         // ──────────────────────────────────────
-        $this->command->info('💰 Inaunda kategoria za kutoa...');
+        $this->command->info('💰 Inaunda kategoria za sadaka...');
         $givingCats = [
-            ['Zaka (Tithe)',            'Zaka ya kumi ya mapato',                       1],
-            ['Sadaka ya Jumla',         'Sadaka za kawaida za ibada',                   2],
-            ['Mfuko wa Ujenzi',         'Kukusanya fedha za jengo jipya la kanisa',     3],
-            ['Mfuko wa Elimu',          'Msaada wa masomo kwa watoto wa kanisa',        4],
-            ['Mfuko wa Afya',           'Msaada wa matibabu kwa wanachama wahitaji',    5],
-            ['World Budget',            'Mchango wa kimataifa wa SDA',                  6],
-            ['Sabbath School Offering', 'Mchango wa masomo ya Sabato',                  7],
-            ['Investment',              'Mradi wa Investment wa kila mwaka',            8],
-            ['Sadaka Maalum',           'Sadaka za matukio maalum',                     9],
+            ['Zaka (Tithe)',                     'Zaka ya kumi ya mapato',                                        1],
+            ['Sadaka ya Jumapili',               'Sadaka ya kawaida ya ibada ya Jumapili',                        2],
+            ['Sadaka ya Sunday School',          'Sadaka ya watoto na Shule ya Jumapili',                         3],
+            ['Mfuko wa Ujenzi',                  'Kukusanya fedha za ujenzi na maendeleo ya kanisa',              4],
+            ['Sadaka ya Uinjilisti & Misheni',   'Mchango wa uinjilisti, upandaji makanisa na misheni',           5],
+            ['Sadaka ya Mahema/Semina',          'Sadaka za semina, mikutano ya injili na mahema',                6],
+            ['Sadaka ya Shukrani',               'Sadaka maalum ya shukrani',                                     7],
+            ['Sadaka Maalum',                    'Sadaka kwa ajili ya matukio au mahitaji maalum',                8],
         ];
         foreach ($givingCats as [$name, $desc, $order]) {
             DB::table('giving_categories')->updateOrInsert(
@@ -248,28 +261,28 @@ class ChurchDemoSeeder extends Seeder
         // ──────────────────────────────────────
         // 7. MATUKIO/IBADA (Events)
         // ──────────────────────────────────────
-        $this->command->info('📅 Inaunda matukio na ibada...');
+        $this->command->info('📅 Inaunda matukio na ibada za kanisa...');
 
         $events = [];
-        $startDate = Carbon::now()->subMonths(6)->startOfWeek(Carbon::SATURDAY);
+        $startDate = Carbon::now()->subMonths(6)->startOfWeek(Carbon::SUNDAY);
         $currentDate = clone $startDate;
         while ($currentDate->lte(Carbon::now()->addWeeks(4))) {
             $event = Event::firstOrCreate(
-                ['name' => 'Ibada ya Sabato', 'date' => $currentDate->format('Y-m-d')],
+                ['name' => 'Ibada ya Jumapili', 'date' => $currentDate->format('Y-m-d')],
                 ['type' => 'service', 'start_time' => '09:00:00', 'end_time' => '12:00:00']
             );
             $events[] = $event;
 
             $event2 = Event::firstOrCreate(
-                ['name' => 'Shule ya Sabato', 'date' => $currentDate->format('Y-m-d')],
+                ['name' => 'Shule ya Jumapili (Sunday School)', 'date' => $currentDate->format('Y-m-d')],
                 ['type' => 'service', 'start_time' => '08:00:00', 'end_time' => '09:00:00']
             );
             $events[] = $event2;
 
             $wednesday = $currentDate->copy()->next(Carbon::WEDNESDAY);
             $event3 = Event::firstOrCreate(
-                ['name' => 'Maombi ya Usiku (Jumatano)', 'date' => $wednesday->format('Y-m-d')],
-                ['type' => 'meeting', 'start_time' => '18:00:00', 'end_time' => '20:00:00']
+                ['name' => 'Maombi na Mafundisho (Jumatano)', 'date' => $wednesday->format('Y-m-d')],
+                ['type' => 'meeting', 'start_time' => '17:30:00', 'end_time' => '19:30:00']
             );
             $events[] = $event3;
 
@@ -277,16 +290,16 @@ class ChurchDemoSeeder extends Seeder
         }
 
         $specialEvents = [
-            ['Kampeni ya Injili - Wiki ya Uinjilisti',  'event',   Carbon::now()->subMonths(5)->format('Y-m-d'),          '18:00', '21:00'],
-            ['Siku ya Familia (Family Day)',             'event',   Carbon::now()->subMonths(4)->format('Y-m-d'),          '10:00', '17:00'],
-            ['Semina ya Ndoa na Familia',               'meeting', Carbon::now()->subMonths(3)->format('Y-m-d'),          '09:00', '16:00'],
-            ['Kampeni ya Afya - ADRA',                  'event',   Carbon::now()->subMonths(3)->addDays(7)->format('Y-m-d'), '08:00', '14:00'],
-            ['Siku ya Pathfinder',                      'event',   Carbon::now()->subMonths(2)->format('Y-m-d'),          '08:00', '17:00'],
-            ['Kongamano la Vijana (AY Rally)',          'event',   Carbon::now()->subMonths(2)->addDays(14)->format('Y-m-d'), '09:00', '18:00'],
-            ['Mkutano Mkuu wa Kanisa',                  'meeting', Carbon::now()->subMonths(1)->format('Y-m-d'),          '14:00', '17:00'],
-            ['Sherehe ya Ubatizo',                      'event',   Carbon::now()->subWeeks(3)->format('Y-m-d'),           '15:00', '17:00'],
-            ['Semina ya Elimu ya Biblia',               'meeting', Carbon::now()->addWeeks(2)->format('Y-m-d'),           '09:00', '16:00'],
-            ['Kampeni ya Injili - Desemba',             'event',   Carbon::now()->addMonths(1)->format('Y-m-d'),          '18:00', '21:00'],
+            ['Mkutano Mkuu wa Injili - Wiki ya Uinjilisti', 'event',   Carbon::now()->subMonths(5)->format('Y-m-d'),          '17:00', '20:30'],
+            ['Siku ya Familia (Family Day)',                 'event',   Carbon::now()->subMonths(4)->format('Y-m-d'),          '10:00', '16:00'],
+            ['Semina ya Ndoa na Familia',                   'meeting', Carbon::now()->subMonths(3)->format('Y-m-d'),          '09:00', '15:00'],
+            ['Kongamano la Wanawake (WWK)',                 'event',   Carbon::now()->subMonths(3)->addDays(7)->format('Y-m-d'), '08:30', '16:00'],
+            ['Semina ya Shule ya Jumapili (Sunday School)', 'event',   Carbon::now()->subMonths(2)->format('Y-m-d'),          '08:30', '13:00'],
+            ['Kongamano la Vijana (CAYP Rally)',            'event',   Carbon::now()->subMonths(2)->addDays(14)->format('Y-m-d'), '09:00', '17:00'],
+            ['Mkutano Mkuu wa Kanisa',                      'meeting', Carbon::now()->subMonths(1)->format('Y-m-d'),          '13:00', '16:00'],
+            ['Sherehe ya Ubatizo wa Maji Mengi',             'event',   Carbon::now()->subWeeks(3)->format('Y-m-d'),           '14:00', '17:00'],
+            ['Semina ya Neno la Mungu na Ufunuo',           'meeting', Carbon::now()->addWeeks(2)->format('Y-m-d'),           '17:00', '20:00'],
+            ['Mkesha Mkuu wa Maombi na Sifa',               'event',   Carbon::now()->addMonths(1)->format('Y-m-d'),          '21:00', '05:00'],
         ];
         foreach ($specialEvents as [$name, $type, $date, $start, $end]) {
             $event = Event::firstOrCreate(
@@ -309,22 +322,25 @@ class ChurchDemoSeeder extends Seeder
 
         $activeMembers = collect($createdMembers)->filter(fn($m) => $m->status === 'active')->values();
 
+        $attendanceInserts = [];
         foreach ($pastEvents as $event) {
             $attendingCount = (int)($activeMembers->count() * (rand(60, 85) / 100));
             $attendingMembers = $activeMembers->random(min($attendingCount, $activeMembers->count()));
             foreach ($attendingMembers as $member) {
                 $status = rand(1, 10) <= 8 ? 'present' : (rand(1, 2) === 1 ? 'late' : 'excused');
-                DB::table('attendances')->updateOrInsert(
-                    ['event_id' => $event->id, 'member_id' => $member->id],
-                    [
-                        'scanned_by' => $admin->id,
-                        'scanned_at' => Carbon::parse($event->date)->format('Y-m-d') . ' ' . Carbon::parse($event->start_time)->format('H:i:s'),
-                        'status'     => $status,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]
-                );
+                $attendanceInserts[] = [
+                    'event_id'   => $event->id,
+                    'member_id'  => $member->id,
+                    'scanned_by' => $admin->id,
+                    'scanned_at' => Carbon::parse($event->date)->format('Y-m-d') . ' ' . Carbon::parse($event->start_time)->format('H:i:s'),
+                    'status'     => $status,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
             }
+        }
+        foreach (array_chunk($attendanceInserts, 100) as $chunk) {
+            DB::table('attendances')->insert($chunk);
         }
 
         // ──────────────────────────────────────
@@ -336,24 +352,33 @@ class ChurchDemoSeeder extends Seeder
         $txCount = 0;
         $txDate = Carbon::now()->subMonths(6)->startOfMonth();
         while ($txDate->lte(Carbon::now())) {
-            if ($txDate->dayOfWeek === Carbon::SATURDAY) {
+            if ($txDate->dayOfWeek === Carbon::SUNDAY) {
                 DB::table('transactions')->insert([
                     'type' => 'income', 'category' => 'Zaka (Tithe)',
                     'amount' => rand(350000, 850000),
                     'payment_method' => $paymentMethods[array_rand($paymentMethods)],
                     'member_id' => null,
-                    'description' => 'Zaka ya Sabato - ' . $txDate->format('d M Y'),
+                    'description' => 'Zaka ya Jumapili - ' . $txDate->format('d M Y'),
                     'transaction_date' => $txDate->format('Y-m-d'),
                     'reference_number' => 'INC-TITHE-' . str_pad(++$txCount, 5, '0', STR_PAD_LEFT),
                     'recorded_by' => $treasurer->id, 'created_at' => now(), 'updated_at' => now(),
                 ]);
                 DB::table('transactions')->insert([
-                    'type' => 'income', 'category' => 'Sadaka ya Jumla',
-                    'amount' => rand(120000, 380000),
+                    'type' => 'income', 'category' => 'Sadaka ya Jumapili',
+                    'amount' => rand(150000, 420000),
                     'payment_method' => 'Cash', 'member_id' => null,
-                    'description' => 'Sadaka ya Ibada - ' . $txDate->format('d M Y'),
+                    'description' => 'Sadaka ya Ibada ya Jumapili - ' . $txDate->format('d M Y'),
                     'transaction_date' => $txDate->format('Y-m-d'),
                     'reference_number' => 'INC-SAD-' . str_pad(++$txCount, 5, '0', STR_PAD_LEFT),
+                    'recorded_by' => $treasurer->id, 'created_at' => now(), 'updated_at' => now(),
+                ]);
+                DB::table('transactions')->insert([
+                    'type' => 'income', 'category' => 'Sadaka ya Sunday School',
+                    'amount' => rand(30000, 95000),
+                    'payment_method' => 'Cash', 'member_id' => null,
+                    'description' => 'Sadaka ya Sunday School - ' . $txDate->format('d M Y'),
+                    'transaction_date' => $txDate->format('Y-m-d'),
+                    'reference_number' => 'INC-SS-' . str_pad(++$txCount, 5, '0', STR_PAD_LEFT),
                     'recorded_by' => $treasurer->id, 'created_at' => now(), 'updated_at' => now(),
                 ]);
                 if (rand(1, 2) === 1) {
@@ -399,7 +424,7 @@ class ChurchDemoSeeder extends Seeder
 
         $pledgeData = [
             [4,  1500000, 850000,  'Mfuko wa Ujenzi wa Kanisa',      Carbon::now()->subMonths(4), Carbon::now()->addMonths(8),  'active'],
-            [6,  500000,  500000,  'Ujenzi wa Darasa la Sabbath School', Carbon::now()->subMonths(5), Carbon::now()->subMonths(1),  'completed'],
+            [6,  500000,  500000,  'Ujenzi wa Darasa la Sunday School', Carbon::now()->subMonths(5), Carbon::now()->subMonths(1),  'completed'],
             [10, 2000000, 600000,  'Mfuko wa Ujenzi wa Kanisa',      Carbon::now()->subMonths(3), Carbon::now()->addMonths(9),  'active'],
             [14, 300000,  300000,  'Kompyuta za Ofisi ya Kanisa',    Carbon::now()->subMonths(6), Carbon::now()->subMonths(3),  'completed'],
             [18, 800000,  200000,  'Mfuko wa Ujenzi wa Kanisa',      Carbon::now()->subMonths(2), Carbon::now()->addMonths(10), 'active'],
@@ -427,28 +452,29 @@ class ChurchDemoSeeder extends Seeder
             );
         }
 
-        // ──────────────────────────────────────
-        // 11. VIKUNDI VIDOGO (Small Groups)
-        // ──────────────────────────────────────
-        $this->command->info('👫 Inaunda vikundi vidogo...');
 
-        $smallGroupsData = [
-            ['Kijiji cha Manzese Ward 3',    $createdMembers[0]->id,  'Jumanne',  '17:30', 'Manzese Ward 3 - Nyumba ya Ndugu Kileo', [1, 4, 10, 16, 22, 28, 34, 40, 46, 52]],
-            ['Kikundi cha Tandale',          $createdMembers[12]->id, 'Jumatano', '18:00', 'Tandale - Kanisa dogo',                  [2, 7, 13, 19, 25, 31, 37, 43, 49, 55]],
-            ['Kikundi cha Magomeni',         $createdMembers[24]->id, 'Alhamisi', '18:30', 'Magomeni - Chumba cha Mkutano',          [3, 8, 14, 20, 26, 32, 38, 44, 50, 56]],
-            ['Kikundi cha Sinza',            $createdMembers[36]->id, 'Ijumaa',   '17:00', 'Sinza - Nyumba ya Ndugu Mwanga',         [5, 9, 15, 21, 27, 33, 39, 45, 51, 57]],
-            ['Kikundi cha Vijana - Central', $createdMembers[8]->id,  'Jumapili', '15:00', 'Kanisa Kuu - Ukumbi wa Vijana',          [11, 17, 23, 29, 35, 41, 47, 53, 58, 59]],
-            ['Kikundi cha Wazee',            $createdMembers[46]->id, 'Jumatatu', '10:00', 'Kanisa Kuu - Chumba cha Wazee',          [6, 18, 30, 42, 48, 54]],
+        // ──────────────────────────────────────
+        // 11. ZONE / KANDA ZA MITAA (Zones)
+        // ──────────────────────────────────────
+        $this->command->info('🗺️ Inaunda Zone za mitaa...');
+
+        $zonesData = [
+            ['Zone ya Manzese Ward 3', $createdMembers[0]->id,  'Jumanne',  '17:30', 'Manzese Ward 3 - Nyumba ya Ndugu Kileo', [1, 4, 10, 16, 22, 28, 34, 40, 46, 52]],
+            ['Zone ya Tandale',        $createdMembers[12]->id, 'Jumatano', '18:00', 'Tandale - Nyumba ya Familia ya Mwita',   [2, 7, 13, 19, 25, 31, 37, 43, 49, 55]],
+            ['Zone ya Magomeni',       $createdMembers[24]->id, 'Alhamisi', '18:30', 'Magomeni - Nyumba ya Ndugu Lusambo',      [3, 8, 14, 20, 26, 32, 38, 44, 50, 56]],
+            ['Zone ya Sinza',          $createdMembers[36]->id, 'Ijumaa',   '17:00', 'Sinza - Nyumba ya Ndugu Mwanga',          [5, 9, 15, 21, 27, 33, 39, 45, 51, 57]],
+            ['Zone ya Mwenge',         $createdMembers[3]->id,  'Jumatano', '17:30', 'Mwenge - Nyumba ya Dada Grace',           [11, 17, 23, 29, 35, 41, 47, 53, 58, 59]],
+            ['Zone ya Kijitonyama',    $createdMembers[1]->id,  'Jumatatu', '17:30', 'Kijitonyama - Nyumba ya Mama Dorcas',     [6, 18, 30, 42, 48, 54]],
         ];
 
-        foreach ($smallGroupsData as [$name, $leaderId, $day, $time, $location, $memberIdxList]) {
+        foreach ($zonesData as [$name, $leaderId, $day, $time, $location, $memberIdxList]) {
             $existing = DB::table('small_groups')->where('name', $name)->first();
             if (!$existing) {
                 DB::table('small_groups')->insert([
-                    'name' => $name, 'description' => 'Kikundi kidogo cha ibada - ' . $name,
+                    'name' => $name, 'description' => 'Zone ya maombi ya nyumbani ya katikati ya wiki - ' . $name,
                     'leader_id' => $leaderId, 'meeting_day' => $day,
                     'meeting_time' => $time . ':00', 'location' => $location,
-                    'max_members' => 15, 'status' => 'active',
+                    'max_members' => 20, 'status' => 'active',
                     'created_at' => now(), 'updated_at' => now(),
                 ]);
             }
@@ -560,17 +586,17 @@ class ChurchDemoSeeder extends Seeder
         // ──────────────────────────────────────
         // 15. MATANGAZO (Announcements)
         // ──────────────────────────────────────
-        $this->command->info('📢 Inaunda matangazo...');
+        $this->command->info('📢 Inaunda matangazo ya kanisa...');
 
         $announcements = [
-            ['Kampeni ya Injili - Imeanza!',    'Kampeni ya injili itaanza tarehe ' . Carbon::now()->addWeeks(2)->format('d M Y') . '. Wote mnaalikwa kushiriki.', Carbon::now()->subDays(3)],
-            ['Mkutano wa Wazee',                'Wazee wa kanisa wanakutana Jumamosi ijayo baada ya ibada. Agenda: Mpango wa mwaka mpya.',                           Carbon::now()->subDays(5)],
-            ['Semina ya Familia',               'Semina ya ndoa na familia itafanyika tarehe ' . Carbon::now()->addWeeks(3)->format('d M Y') . '. Wataalam watakuwepo.', Carbon::now()->subDays(7)],
-            ['Mchango wa Ujenzi',               'Mfuko wa Ujenzi unakusanya. Target: TZS 50,000,000. Tumefikia 65% ya lengo!',                                        Carbon::now()->subDays(10)],
-            ['Ubatizo Ujao',                    'Itakuwa na ubatizo tarehe ' . Carbon::now()->addWeeks(4)->format('d M Y') . '. Wanaotarajiwa kubatizwa ni 8.',       Carbon::now()->subDays(14)],
-            ['Saa za Ofisi ya Kanisa',          'Ofisi inafungua Jumatatu-Ijumaa 8:00am-5:00pm. Msimamizi: Ndg. Samuel Kagera - 0754001003.',                         Carbon::now()->subDays(20)],
-            ['Pathfinder Rally',                'Mkutano wa Pathfinder wa Mkoa utafanyika hapa tarehe ' . Carbon::now()->addMonths(1)->format('d M Y') . '.',          Carbon::now()->subDays(21)],
-            ['Ahsante kwa Wasaidizi',           'Tunamshukuru sana Dada Grace Mhina kwa kuandaa chakula cha mkutano wa wiki iliyopita. Mungu akubariki!',              Carbon::now()->subDays(25)],
+            ['Mkutano Mkuu wa Injili - Imeanza!', 'Mkutano wa injili utaanza tarehe ' . Carbon::now()->addWeeks(2)->format('d M Y') . '. Wote mnaalikwa kushiriki na kuleta wageni.', Carbon::now()->subDays(3)],
+            ['Mkutano wa Wazee wa Kanisa',      'Wazee wa kanisa na mashemasi wanakutana Jumapili ijayo baada ya ibada. Agenda: Maandalizi ya mikutano ya uinjilisti.', Carbon::now()->subDays(5)],
+            ['Semina ya Ndoa na Familia',       'Semina ya ndoa na familia itafanyika tarehe ' . Carbon::now()->addWeeks(3)->format('d M Y') . '. Wataalam na watumishi watakuwepo.', Carbon::now()->subDays(7)],
+            ['Mchango wa Mfuko wa Ujenzi',      'Mfuko wa Ujenzi unaendelea kupokea michango. Lengo: TZS 50,000,000. Tumefikia 65% ya lengo! Mungu awabariki wote mnaojitoa.', Carbon::now()->subDays(10)],
+            ['Sherehe ya Ubatizo Ujao',         'Kutakuwa na ubatizo wa maji mengi tarehe ' . Carbon::now()->addWeeks(4)->format('d M Y') . '. Wanaotarajiwa kubatizwa wajiandikishe.', Carbon::now()->subDays(14)],
+            ['Saa za Ofisi ya Mchungaji',       'Ofisi ipo wazi Jumatatu hadi Ijumaa 8:30am - 4:30pm kwa ajili ya maombi na ushauri wa kiroho.', Carbon::now()->subDays(20)],
+            ['Kongamano la Vijana (CAYP)',      'Kongamano la vijana la kanda litafanyika hapa tarehe ' . Carbon::now()->addMonths(1)->format('d M Y') . '. Vijana wote mjiandae.', Carbon::now()->subDays(21)],
+            ['Kongamano la Wanawake (WWK)',     'Wamama wote wa WWK mnakumbushwa maandalizi ya semina maalum ya ujasiriamali na maombi.', Carbon::now()->subDays(25)],
         ];
 
         foreach ($announcements as [$title, $body, $date]) {
@@ -600,27 +626,49 @@ class ChurchDemoSeeder extends Seeder
         }
 
         // ──────────────────────────────────────
+        // 17. MIPANGILIO YA MFUMO (System Settings)
+        // ──────────────────────────────────────
+        $this->command->info('⚙️ Inaunda mipangilio ya kanisa...');
+        $settings = [
+            'church_name'     => 'Hosanna International Church',
+            'church_slogan'   => 'Kutangaza Injili ya Yesu Kristo kwa Mataifa Yote',
+            'church_address'  => 'Dar es Salaam, Tanzania',
+            'church_phone'    => '+255 754 001 000',
+            'church_email'    => 'info@hosannachurch.org',
+            'currency_symbol' => 'TZS',
+            'church_logo'     => 'images/sda-logo.png',
+        ];
+        foreach ($settings as $key => $val) {
+            DB::table('system_settings')->updateOrInsert(
+                ['key' => $key],
+                ['value' => $val, 'created_at' => now(), 'updated_at' => now()]
+            );
+        }
+
+        // ──────────────────────────────────────
         // MUHTASARI
         // ──────────────────────────────────────
         $this->command->newLine();
         $this->command->info('════════════════════════════════════════════════');
-        $this->command->info('  ✅ DATA ZA MFANO ZIMEPAKIWA KIKAMILIFU!');
+        $this->command->info('  ✅ DATA ZA MFANO ZA HOSANNA INTERNATIONAL CHURCH ZIMEPAKIWA!');
         $this->command->info('════════════════════════════════════════════════');
         $this->command->info('  👥 Wanachama      : ' . count($createdMembers));
         $this->command->info('  🏛️  Idara           : ' . count($deptData));
         $this->command->info('  📅 Matukio/Ibada   : ' . Event::count());
         $this->command->info('  💰 Fedha (Tx)      : ' . DB::table('transactions')->count());
         $this->command->info('  🤝 Ahadi (Pledges) : ' . DB::table('pledges')->count());
-        $this->command->info('  👫 Vikundi Vidogo  : ' . DB::table('small_groups')->count());
+        $this->command->info('  🗺️  Zone / Kanda   : ' . DB::table('small_groups')->count());
         $this->command->info('  🙋 Wageni          : ' . DB::table('visitors')->count());
         $this->command->info('  🙏 Maombi          : ' . DB::table('prayer_requests')->count());
         $this->command->info('  🚗 Ziara            : ' . DB::table('visits')->count());
         $this->command->info('════════════════════════════════════════════════');
-        $this->command->info('  🔑 LOGIN DETAILS:');
-        $this->command->info('  Super Admin : admin@manzesesda.com    | Admin@2025!');
-        $this->command->info('  Mchungaji   : mchungaji@manzesesda.com | password');
-        $this->command->info('  Hazina      : hazina@manzesesda.com   | password');
-        $this->command->info('  Msimamizi   : msimamizi@manzesesda.com | password');
+        $this->command->info('  🔑 LOGIN DETAILS (HOSANNA INTERNATIONAL CHURCH):');
+        $this->command->info('  Super Admin : admin@hosannachurch.org       | Admin@2025!');
+        $this->command->info('  Mchungaji   : mchungaji@hosannachurch.org   | password');
+        $this->command->info('  Hazina      : hazina@hosannachurch.org      | password');
+        $this->command->info('  Msimamizi   : msimamizi@hosannachurch.org   | password');
+        $this->command->info('  Mhasibu     : accountant@hosannachurch.org  | password');
+        $this->command->info('  Muumini     : mwanachama@hosannachurch.org  | password');
         $this->command->info('════════════════════════════════════════════════');
     }
 }

@@ -22,6 +22,8 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+            $request->session()->put('locale', 'sw');
+            app()->setLocale('sw');
 
             $user = Auth::user();
             
@@ -44,6 +46,8 @@ class LoginController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        $request->session()->put('locale', 'sw');
+        app()->setLocale('sw');
 
         return redirect('/');
     }

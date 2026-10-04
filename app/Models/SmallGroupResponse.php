@@ -79,29 +79,29 @@ class SmallGroupResponse extends Model
     }
 
     /**
-     * Calculate the Saturday (start) of the current Adventist week
-     * Week runs Saturday to Friday
+     * Calculate the Sunday (start) of the current church week
+     * Week runs Sunday to Saturday
      */
     public static function getCurrentWeekStart(): Carbon
     {
         $today = Carbon::now();
         $dayOfWeek = $today->dayOfWeek;
         
-        // If today is Saturday (6), return today
-        if ($dayOfWeek === Carbon::SATURDAY) {
+        // If today is Sunday (0), return today
+        if ($dayOfWeek === Carbon::SUNDAY) {
             return $today->startOfDay();
         }
         
-        // Otherwise, get the previous Saturday
-        return $today->previous(Carbon::SATURDAY)->startOfDay();
+        // Otherwise, get the previous Sunday
+        return $today->previous(Carbon::SUNDAY)->startOfDay();
     }
 
     /**
-     * Get the end date of a week (Friday)
+     * Get the end date of a week (Saturday)
      */
     public static function getWeekEnd(Carbon $weekStart): Carbon
     {
-        return $weekStart->copy()->addDays(6); // Saturday + 6 = Friday
+        return $weekStart->copy()->addDays(6); // Sunday + 6 = Saturday
     }
 
     /**

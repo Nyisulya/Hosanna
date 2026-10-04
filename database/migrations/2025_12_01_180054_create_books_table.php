@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('books', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('author')->default('Ellen G. White');
+            $table->string('author')->default('Hosanna');
             $table->string('language')->default('sw');
             $table->string('cover_image_path')->nullable();
-            $table->string('file_path'); // Path to the PDF
+            $table->string('file_path')->nullable(); // Path to the PDF
             $table->text('description')->nullable();
             $table->timestamps();
         });

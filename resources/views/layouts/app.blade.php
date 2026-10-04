@@ -13,6 +13,28 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <!-- TailwindCSS (for compatibility) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- NProgress for Ultra-Fast Zero-Refresh Transitions -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+    <script src="{{ asset('js/spa-engine.js') }}?v={{ time() }}"></script>
+    <style>
+        #nprogress .bar {
+            background: linear-gradient(90deg, #2563eb, #7c3aed, #ec4899) !important;
+            height: 3px !important;
+            box-shadow: 0 0 10px rgba(124, 58, 237, 0.7);
+            z-index: 99999 !important;
+        }
+        #nprogress .peg {
+            box-shadow: 0 0 10px #7c3aed, 0 0 5px #ec4899 !important;
+        }
+        .content-wrapper {
+            transition: opacity 0.12s ease-in-out;
+        }
+        .content-wrapper.spa-loading {
+            opacity: 0.75;
+            pointer-events: none;
+        }
+    </style>
     
     @stack('styles')
 </head>
@@ -102,6 +124,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
 <!-- AdminLTE App -->
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @stack('scripts')
 </body>
 </html>

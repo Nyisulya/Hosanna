@@ -21,12 +21,11 @@ class LocaleServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Set locale from session on every request
-        if (Session::has('locale')) {
-            $locale = Session::get('locale');
-            if (in_array($locale, ['en', 'sw'])) {
-                App::setLocale($locale);
-            }
+        $locale = Session::get('locale', config('app.locale', 'sw'));
+        if (in_array($locale, ['en', 'sw'])) {
+            App::setLocale($locale);
+        } else {
+            App::setLocale('sw');
         }
     }
 }

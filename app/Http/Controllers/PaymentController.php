@@ -9,6 +9,7 @@ use App\Models\SmallGroupOffering;
 use App\Models\SmallGroupPayment;
 use App\Models\Contribution;
 use App\Services\PesapalService;
+use App\Services\HarakaPayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -18,10 +19,12 @@ use Illuminate\Support\Str;
 class PaymentController extends Controller
 {
     protected $pesapal;
+    protected $harakapay;
 
-    public function __construct(PesapalService $pesapal)
+    public function __construct(PesapalService $pesapal, HarakaPayService $harakapay)
     {
         $this->pesapal = $pesapal;
+        $this->harakapay = $harakapay;
     }
 
     /**
@@ -58,18 +61,20 @@ class PaymentController extends Controller
             $preselectedPledge = $pledges->firstWhere('id', $preselectedPledgeId);
         }
 
-        return view('payments.form', compact('categories', 'pledges', 'smallGroupOfferings', 'preselectedPledge'));
+        $gateway = config('services.payment_gateway', env('PAYMENT_GATEWAY', 'harakapay'));
+
+        return view('payments.form', compact('categories', 'pledges', 'smallGroupOfferings', 'preselectedPledge', 'gateway'));
     }
 
     /**
-     * Process the payment via Pesapal.
+     * Process the payment via HarakaPay (default) or Pesapal.
      */
     public function process(Request $request)
     {
         $request->validate([
             'payment_type' => 'required|in:general,pledge,small_group',
             'amount' => 'required|numeric|min:100', // Minimum 100 TZS
-            'phone_number' => 'nullable|string',
+            'phone_number' => 'required|string',
             'description' => 'nullable|string|max:255',
             
             // Conditional validation
@@ -81,18 +86,19 @@ class PaymentController extends Controller
         $user = Auth::user();
         $member = $user->member;
         if (!$member) {
-            return redirect()->back()->with('error', 'No member profile linked to your account.');
+            return redirect()->back()->with('error', 'Haujaunganishwa na wasifu wa muumini.');
         }
 
         $reference = 'TX-' . Str::upper(Str::random(12));
         $category = 'General Giving';
         $pledgeId = null;
         $smallGroupOfferingId = null;
+        $appName = config('app.name', 'Kanisa');
 
         // Determine category and details based on payment type
         if ($request->payment_type === 'general') {
             $category = 'Giving: ' . $request->category;
-            $payDescription = "Manzese SDA Church - " . $request->category;
+            $payDescription = "{$appName} - " . $request->category;
         } elseif ($request->payment_type === 'pledge') {
             $pledge = Pledge::findOrFail($request->pledge_id);
             $pledgeId = $pledge->id;
@@ -109,14 +115,54 @@ class PaymentController extends Controller
             $payDescription .= " (" . $request->description . ")";
         }
 
-        // Initiate Pesapal Order
+        $phone = $request->phone_number ?: ($member->phone ?? '0700000000');
+        $gateway = config('services.payment_gateway', env('PAYMENT_GATEWAY', 'harakapay'));
+
+        // ========================================================
+        // 1. HARAKAPAY MOBILE MONEY (USSD PUSH) - DEFAULT
+        // ========================================================
+        if ($gateway === 'harakapay') {
+            $collectResult = $this->harakapay->collect(
+                $request->amount,
+                $phone,
+                $reference
+            );
+
+            if ($collectResult['success']) {
+                $orderId = $collectResult['order_id'];
+
+                $payment = Payment::create([
+                    'member_id' => $member->id,
+                    'pledge_id' => $pledgeId,
+                    'small_group_offering_id' => $smallGroupOfferingId,
+                    'transaction_id' => $orderId,
+                    'reference' => $reference,
+                    'status' => 'pending',
+                    'amount' => $request->amount,
+                    'currency' => 'TZS',
+                    'category' => $category,
+                    'description' => $payDescription,
+                    'phone_number' => $phone,
+                    'network' => 'harakapay',
+                ]);
+
+                return redirect()->route('give.waiting', $payment->id)
+                    ->with('success', 'Ombi la malipo limetumwa kwenye simu yako! Tafadhali weka PIN kukamilisha.');
+            } else {
+                return redirect()->back()->with('error', $collectResult['message'] ?? 'Imeshindwa kuanzisha malipo ya HarakaPay. Tafadhali hakikisha namba yako ni sahihi.');
+            }
+        }
+
+        // ========================================================
+        // 2. PESAPAL GATEWAY FALLBACK
+        // ========================================================
         $response = $this->pesapal->submitOrder(
             $request->amount,
             $reference,
             $payDescription,
             $user->email,
             $member->full_name,
-            $request->phone_number ?? $member->phone ?? '255700000000'
+            $phone
         );
 
         if ($response && isset($response['redirect_url'])) {
@@ -131,10 +177,10 @@ class PaymentController extends Controller
                 'currency' => 'TZS',
                 'category' => $category,
                 'description' => $payDescription,
-                'phone_number' => $request->phone_number ?? $member->phone ?? 'N/A',
+                'phone_number' => $phone,
+                'network' => 'pesapal',
             ]);
 
-            // Redirect to Pesapal iframe / checkout redirect url
             return redirect()->away($response['redirect_url']);
         } else {
             Log::error('Pesapal Order Initiation Failed', ['response' => $response]);
@@ -143,35 +189,146 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle successful payment redirect callback from Pesapal.
+     * Show waiting prompt for mobile money USSD PIN confirmation
+     */
+    public function waiting(Payment $payment)
+    {
+        $user = Auth::user();
+        if ($payment->member_id !== ($user->member->id ?? null) && !$user->hasRole('super_admin')) {
+            abort(403);
+        }
+
+        if ($payment->status === 'succeeded') {
+            return redirect()->route('give.success', ['reference' => $payment->reference]);
+        }
+
+        return view('payments.waiting', compact('payment'));
+    }
+
+    /**
+     * AJAX Endpoint to poll payment status in real-time
+     */
+    public function checkStatus(Payment $payment)
+    {
+        $user = Auth::user();
+        if ($payment->member_id !== ($user->member->id ?? null) && !$user->hasRole('super_admin')) {
+            return response()->json(['status' => 'unauthorized'], 403);
+        }
+
+        if ($payment->status === 'succeeded') {
+            return response()->json([
+                'status' => 'completed',
+                'redirect' => route('give.success', ['reference' => $payment->reference]),
+                'message' => 'Malipo yamekamilika kikamilifu!'
+            ]);
+        }
+
+        // If HarakaPay, check with HarakaPay status API
+        if ($payment->transaction_id && ($payment->network === 'harakapay' || config('services.payment_gateway') === 'harakapay')) {
+            $check = $this->harakapay->checkStatus($payment->transaction_id);
+
+            if ($check['success']) {
+                $remoteStatus = $check['status'];
+
+                if (in_array($remoteStatus, ['completed', 'successful'])) {
+                    $this->completePaymentTransaction($payment, $payment->transaction_id, [
+                        'confirmation_code' => $payment->transaction_id,
+                        'payment_method' => 'harakapay',
+                    ]);
+
+                    return response()->json([
+                        'status' => 'completed',
+                        'redirect' => route('give.success', ['reference' => $payment->reference]),
+                        'message' => 'Malipo yamekamilika kikamilifu! Asante sana.'
+                    ]);
+                } elseif (in_array($remoteStatus, ['failed', 'cancelled', 'rejected'])) {
+                    $payment->update(['status' => 'failed']);
+                    return response()->json([
+                        'status' => 'failed',
+                        'message' => 'Malipo yamekataliwa au yameshindikana kwenye simu yako.'
+                    ]);
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => 'processing',
+            'message' => 'Inasubiri kuweka PIN kwenye simu yako...'
+        ]);
+    }
+
+    /**
+     * Handle successful payment redirect callback from Pesapal / Direct reference
      */
     public function success(Request $request)
     {
         $trackingId = $request->query('OrderTrackingId');
-        $reference = $request->query('OrderMerchantReference');
+        $reference = $request->query('OrderMerchantReference') ?? $request->query('reference');
 
-        if ($trackingId && $reference) {
-            // Verify payment status from Pesapal API
-            $verifyResponse = $this->pesapal->getTransactionStatus($trackingId);
+        if ($reference) {
+            $payment = Payment::where('reference', $reference)->first();
 
-            if ($verifyResponse && isset($verifyResponse['payment_status_description'])) {
-                $status = $verifyResponse['payment_status_description'];
-
-                if ($status === 'Completed' || $status === 'Success') {
-                    $payment = Payment::where('reference', $reference)->first();
-
-                    if ($payment) {
-                        if ($payment->status === 'pending') {
+            if ($payment) {
+                // If payment is pending and trackingId exists (Pesapal)
+                if ($payment->status === 'pending' && $trackingId) {
+                    $verifyResponse = $this->pesapal->getTransactionStatus($trackingId);
+                    if ($verifyResponse && isset($verifyResponse['payment_status_description'])) {
+                        $status = $verifyResponse['payment_status_description'];
+                        if ($status === 'Completed' || $status === 'Success') {
                             $this->completePaymentTransaction($payment, $trackingId, $verifyResponse);
                         }
-                        
-                        return view('payments.success', compact('payment', 'reference'));
                     }
+                }
+                
+                // If HarakaPay pending check
+                if ($payment->status === 'pending' && $payment->transaction_id && $payment->network === 'harakapay') {
+                    $check = $this->harakapay->checkStatus($payment->transaction_id);
+                    if ($check['success'] && in_array($check['status'], ['completed', 'successful'])) {
+                        $this->completePaymentTransaction($payment, $payment->transaction_id, [
+                            'confirmation_code' => $payment->transaction_id,
+                            'payment_method' => 'harakapay',
+                        ]);
+                    }
+                }
+
+                if ($payment->status === 'succeeded') {
+                    return view('payments.success', compact('payment', 'reference'));
                 }
             }
         }
 
         return redirect()->route('give.form')->with('error', 'Malipo hayakukamilika au yameshindikana.');
+    }
+
+    /**
+     * HarakaPay Webhook callback (if configured in HarakaPay dashboard)
+     */
+    public function harakapayCallback(Request $request)
+    {
+        $orderId = $request->input('order_id') ?? $request->input('orderId');
+        $status = strtolower($request->input('status', ''));
+        $reference = $request->input('reference');
+
+        Log::info('HarakaPay Webhook Received', ['payload' => $request->all()]);
+
+        if ($orderId || $reference) {
+            $payment = Payment::where('transaction_id', $orderId)
+                ->orWhere('reference', $reference)
+                ->first();
+
+            if ($payment && $payment->status === 'pending') {
+                if (in_array($status, ['completed', 'successful', 'success'])) {
+                    $this->completePaymentTransaction($payment, $orderId ?? $payment->transaction_id, [
+                        'confirmation_code' => $orderId ?? $payment->transaction_id,
+                        'payment_method' => 'harakapay',
+                    ]);
+                } elseif (in_array($status, ['failed', 'cancelled', 'rejected'])) {
+                    $payment->update(['status' => 'failed']);
+                }
+            }
+        }
+
+        return response()->json(['success' => true]);
     }
 
     /**
@@ -211,16 +368,21 @@ class PaymentController extends Controller
     /**
      * Complete the payment transaction and create appropriate logs/pledge records.
      */
-    protected function completePaymentTransaction($payment, $trackingId, $pesapalData)
+    protected function completePaymentTransaction($payment, $trackingId, $paymentData)
     {
-        DB::transaction(function () use ($payment, $trackingId, $pesapalData) {
-            $confirmationCode = $pesapalData['confirmation_code'] ?? $trackingId;
+        // Avoid duplicate execution if already marked succeeded
+        if ($payment->status === 'succeeded') {
+            return;
+        }
+
+        DB::transaction(function () use ($payment, $trackingId, $paymentData) {
+            $confirmationCode = $paymentData['confirmation_code'] ?? $trackingId;
             
             // 1. Update payment record
             $payment->update([
                 'status' => 'succeeded',
-                'transaction_id' => $confirmationCode, // Store actual M-Pesa reference / Card code
-                'network' => $pesapalData['payment_method'] ?? 'pesapal',
+                'transaction_id' => $confirmationCode, // Store actual reference
+                'network' => $paymentData['payment_method'] ?? 'harakapay',
             ]);
 
             // 2. Create financial transaction
@@ -293,7 +455,7 @@ class PaymentController extends Controller
                     'paid_at' => now(),
                     'payment_method' => 'mobile_money',
                     'recorded_by' => $payment->member->user_id ?? Auth::id() ?? 1,
-                    'notes' => 'Online payment via Pesapal',
+                    'notes' => 'Online payment via ' . ($paymentData['payment_method'] ?? 'mobile money'),
                 ]);
             }
         });
@@ -303,7 +465,6 @@ class PaymentController extends Controller
             $payment->loadMissing('member');
             if ($payment->member && $payment->member->phone) {
                 $member = $payment->member;
-                $amountStr = number_format($payment->amount);
                 $dateStr = now()->format('d/m/Y');
                 $message = "";
 
@@ -313,13 +474,24 @@ class PaymentController extends Controller
                     if ($pledge) {
                         $pledge->refresh();
                         $remainingBalance = max(0, $pledge->amount - $pledge->amount_paid);
-                        $message = "Bwana asifiwe " . $member->full_name . "! Tumepokea Shs " . $amountStr . " kwa ajili ya ahadi yako ya \"" . $pledge->purpose . "\". Salio lililobaki ni Shs " . number_format($remainingBalance) . ". Mungu akubariki!";
+                        $message = \App\Services\SmsService::buildPledgePaymentMessage(
+                            $member->full_name,
+                            $pledge->purpose,
+                            $payment->amount,
+                            $remainingBalance,
+                            $dateStr
+                        );
                     }
                 } elseif ($payment->small_group_offering_id) {
                     // Small Group Payment SMS
                     $offering = SmallGroupOffering::find($payment->small_group_offering_id);
-                    $offeringName = $offering ? $offering->name : 'Kanda';
-                    $message = "Bwana asifiwe " . $member->full_name . "! Tumepokea mchango wako wa Shs " . $amountStr . " wa tarehe " . $dateStr . " kwa ajili ya " . $offeringName . ". Mungu akubariki sana!";
+                    $offeringName = $offering ? $offering->name : 'Kanda / Jumuiya';
+                    $message = \App\Services\SmsService::buildSmallGroupPaymentMessage(
+                        $member->full_name,
+                        $offeringName,
+                        $payment->amount,
+                        $dateStr
+                    );
                 } else {
                     // General Giving SMS (Zaka/Sadaka/etc.)
                     $typeLabel = 'Mchango';
@@ -336,7 +508,12 @@ class PaymentController extends Controller
                         $typeLabel = 'Mchango wa Mradi';
                     }
 
-                    $message = "Bwana asifiwe " . $member->full_name . "! Tumepokea " . $typeLabel . " yako ya kiasi cha Shs " . $amountStr . " ya tarehe " . $dateStr . ". Asante sana kwa kutoa kwa ajili ya kazi ya Bwana. Mungu akubariki sana!";
+                    $message = \App\Services\SmsService::buildContributionReceiptMessage(
+                        $member->full_name,
+                        $typeLabel,
+                        $payment->amount,
+                        $dateStr
+                    );
                 }
 
                 if (!empty($message)) {

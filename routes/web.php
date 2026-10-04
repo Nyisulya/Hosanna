@@ -75,52 +75,38 @@ Route::post('departments/{department}/announcements', [App\Http\Controllers\Depa
     ->name('departments.announcements.store')
     ->middleware(['auth']);
 
-// Small Groups Routes
+
 Route::middleware(['auth'])->group(function () {
+    // Zone / Kanda Routes
     Route::resource('small-groups', App\Http\Controllers\SmallGroupController::class);
+    Route::get('/zones', [App\Http\Controllers\SmallGroupController::class, 'index'])->name('zones.index');
     Route::post('/small-groups/{smallGroup}/add-member', [App\Http\Controllers\SmallGroupController::class, 'addMember'])->name('small-groups.add-member');
     Route::delete('/small-groups/{smallGroup}/remove-member/{member}', [App\Http\Controllers\SmallGroupController::class, 'removeMember'])->name('small-groups.remove-member');
     Route::post('/small-groups/{smallGroup}/meetings', [App\Http\Controllers\SmallGroupController::class, 'storeMeeting'])->name('small-groups.store-meeting');
+    Route::post('/small-groups/meetings/{meeting}/send-reminder', [App\Http\Controllers\SmallGroupController::class, 'sendMeetingReminder'])->name('small-groups.meetings.send-reminder');
+    Route::get('/small-groups/meetings/{meeting}/attendance', [App\Http\Controllers\SmallGroupController::class, 'meetingAttendance'])->name('small-groups.meetings.attendance');
+    Route::post('/small-groups/meetings/{meeting}/attendance', [App\Http\Controllers\SmallGroupController::class, 'saveMeetingAttendance'])->name('small-groups.meetings.save-attendance');
     Route::get('/my-small-group', [App\Http\Controllers\SmallGroupController::class, 'myGroup'])->name('small-groups.my-group');
+    Route::get('/my-zone', [App\Http\Controllers\SmallGroupController::class, 'myGroup'])->name('zones.my-group');
     
-    // Kanda Attendance Tracking
+    // Zone Attendance Tracking
     Route::get('/my-small-group/attendance', [App\Http\Controllers\SmallGroupController::class, 'groupAttendance'])->name('small-groups.attendance');
+    Route::get('/my-zone/attendance', [App\Http\Controllers\SmallGroupController::class, 'groupAttendance'])->name('zones.attendance');
     Route::post('/my-small-group/attendance/mark', [App\Http\Controllers\SmallGroupController::class, 'markGroupAttendance'])->name('small-groups.attendance.mark');
     Route::post('/my-small-group/attendance/bulk-mark', [App\Http\Controllers\SmallGroupController::class, 'bulkMarkGroupAttendance'])->name('small-groups.attendance.bulk-mark');
     
-    // Small Group Weekly Reporting - Admin Question Management
-    Route::get('/small-groups-admin/questions', [App\Http\Controllers\SmallGroupQuestionController::class, 'index'])->name('small-groups.questions.index');
-    Route::get('/small-groups-admin/questions/create', [App\Http\Controllers\SmallGroupQuestionController::class, 'create'])->name('small-groups.questions.create');
-    Route::post('/small-groups-admin/questions', [App\Http\Controllers\SmallGroupQuestionController::class, 'store'])->name('small-groups.questions.store');
-    Route::get('/small-groups-admin/questions/{question}/edit', [App\Http\Controllers\SmallGroupQuestionController::class, 'edit'])->name('small-groups.questions.edit');
-    Route::put('/small-groups-admin/questions/{question}', [App\Http\Controllers\SmallGroupQuestionController::class, 'update'])->name('small-groups.questions.update');
-    Route::delete('/small-groups-admin/questions/{question}', [App\Http\Controllers\SmallGroupQuestionController::class, 'destroy'])->name('small-groups.questions.destroy');
-    Route::post('/small-groups-admin/questions/{question}/toggle', [App\Http\Controllers\SmallGroupQuestionController::class, 'toggleStatus'])->name('small-groups.questions.toggle');
+    // Redirect legacy weekly report paths to small-groups
+    Route::any('/weekly-reports/{any?}', function () {
+        return redirect()->route('small-groups.index');
+    })->where('any', '.*');
+    Route::any('/small-groups-admin/questions/{any?}', function () {
+        return redirect()->route('small-groups.index');
+    })->where('any', '.*');
     
-    // Weekly Reporting (Independent)
-    Route::prefix('weekly-reports')->name('weekly-reports.')->group(function () {
-        Route::get('/', [App\Http\Controllers\SmallGroupResponseController::class, 'index'])->name('index');
-        Route::get('/create', [App\Http\Controllers\SmallGroupResponseController::class, 'create'])->name('create');
-        Route::post('/', [App\Http\Controllers\SmallGroupResponseController::class, 'store'])->name('store');
-        Route::get('/{weekStart}/edit', [App\Http\Controllers\SmallGroupResponseController::class, 'edit'])->name('edit');
-        Route::put('/{weekStart}', [App\Http\Controllers\SmallGroupResponseController::class, 'update'])->name('update');
-        
-        // Group reporting for Leaders/Admin
-        Route::get('/group/create', [App\Http\Controllers\SmallGroupResponseController::class, 'createGroupReport'])->name('group.create');
-        Route::post('/group', [App\Http\Controllers\SmallGroupResponseController::class, 'storeGroupReport'])->name('group.store');
-        Route::get('/group/{groupId}/{weekStart}/edit', [App\Http\Controllers\SmallGroupResponseController::class, 'editGroupReport'])->name('group.edit');
-        Route::put('/group/{groupId}/{weekStart}', [App\Http\Controllers\SmallGroupResponseController::class, 'updateGroupReport'])->name('group.update');
-        
-        // Leader & Admin Dashboards
-        Route::get('/leader-dashboard', [App\Http\Controllers\SmallGroupResponseController::class, 'leaderDashboard'])->name('leader-dashboard');
-        Route::get('/admin', [App\Http\Controllers\SmallGroupResponseController::class, 'adminDashboard'])->name('admin');
-    });
-    
-    // Small Group Finance & Communication
+    // Zone Finance & Communication
     Route::post('/small-groups/{smallGroup}/finance/offering', [App\Http\Controllers\SmallGroupFinanceController::class, 'storeOffering'])->name('small-groups.finance.store-offering');
     Route::get('/small-groups/finance/{offering}', [App\Http\Controllers\SmallGroupFinanceController::class, 'showOffering'])->name('small-groups.finance.show');
     Route::post('/small-groups/finance/{offering}/payment', [App\Http\Controllers\SmallGroupFinanceController::class, 'storePayment'])->name('small-groups.finance.store-payment');
-    
     Route::post('/small-groups/{smallGroup}/communication/remind-pending', [App\Http\Controllers\SmallGroupCommunicationController::class, 'remindPendingReporters'])->name('small-groups.communication.remind-pending');
     Route::post('/small-groups/finance/{offering}/remind-debtors', [App\Http\Controllers\SmallGroupCommunicationController::class, 'remindDebtors'])->name('small-groups.communication.remind-debtors');
 
@@ -169,16 +155,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('announcements', App\Http\Controllers\ChurchAnnouncementController::class);
 });
 
-// Care Requests Routes (Member to Leader Communication)
-Route::middleware(['auth'])->prefix('care-requests')->name('care-requests.')->group(function () {
-    Route::get('/', [App\Http\Controllers\CareRequestController::class, 'index'])->name('index');
-    Route::get('/create', [App\Http\Controllers\CareRequestController::class, 'create'])->name('create');
-    Route::post('/', [App\Http\Controllers\CareRequestController::class, 'store'])->name('store');
-    Route::get('/leader/dashboard', [App\Http\Controllers\CareRequestController::class, 'leaderDashboard'])->name('leader-dashboard');
-    Route::get('/{careRequest}', [App\Http\Controllers\CareRequestController::class, 'show'])->name('show');
-    Route::post('/{careRequest}/respond', [App\Http\Controllers\CareRequestController::class, 'respond'])->name('respond');
-    Route::patch('/{careRequest}/status', [App\Http\Controllers\CareRequestController::class, 'updateStatus'])->name('update-status');
-});
 
 Route::resource('users', App\Http\Controllers\UserController::class)->middleware(['auth']);
 Route::get('/attendance/scanner', App\Livewire\AttendanceScanner::class)->name('attendance.scanner')->middleware(['auth']);
@@ -187,6 +163,7 @@ Route::get('/attendance/scan-qr/{memberNumber}', [App\Http\Controllers\Attendanc
 Route::post('/attendance/scan-qr/{memberNumber}', [App\Http\Controllers\AttendanceController::class, 'scanQrLogin'])->name('attendance.scan-qr.login');
 Route::middleware(['auth'])->prefix('attendance')->group(function () {
     Route::get('/', [App\Http\Controllers\AttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/record', [App\Http\Controllers\AttendanceController::class, 'recordManual'])->name('attendance.record');
     Route::get('/my-attendance', [App\Http\Controllers\AttendanceController::class, 'myAttendance'])->name('attendance.my-attendance');
     Route::get('/events/{event}', [App\Http\Controllers\AttendanceController::class, 'show'])->name('attendance.show');
     Route::post('/events/{event}/mark', [App\Http\Controllers\AttendanceController::class, 'markAttendance'])->name('attendance.mark');
@@ -216,6 +193,7 @@ Route::middleware(['auth'])->prefix('reports')->name('reports.')->group(function
     Route::get('/calendar/events', [App\Http\Controllers\CalendarController::class, 'events'])->name('calendar.events');
     Route::get('/communication', [App\Http\Controllers\CommunicationController::class, 'index'])->name('communication.index');
     Route::post('/communication/send', [App\Http\Controllers\CommunicationController::class, 'send'])->name('communication.send');
+    Route::post('/communication/saturday-reminder', [App\Http\Controllers\CommunicationController::class, 'sendSaturdayReminderNow'])->name('communication.saturday-reminder');
     Route::get('/dashboard', [App\Http\Controllers\ReportController::class, 'dashboard'])->name('dashboard');
 });
 
@@ -232,11 +210,14 @@ Route::prefix('financial')->middleware(['auth'])->group(function () {
     Route::get('/reports', [App\Http\Controllers\FinancialController::class, 'reports'])->name('financial.reports');
 });
 
-// Online Giving routes (Pesapal v3)
+// Online Giving routes (HarakaPay Mobile Money / Pesapal v3)
 Route::get('/give', [App\Http\Controllers\PaymentController::class, 'showForm'])->name('give.form')->middleware(['auth']);
 Route::post('/give', [App\Http\Controllers\PaymentController::class, 'process'])->name('give.process')->middleware(['auth']);
+Route::get('/give/waiting/{payment}', [App\Http\Controllers\PaymentController::class, 'waiting'])->name('give.waiting')->middleware(['auth']);
+Route::get('/give/status/{payment}', [App\Http\Controllers\PaymentController::class, 'checkStatus'])->name('give.status')->middleware(['auth']);
 Route::get('/give/success', [App\Http\Controllers\PaymentController::class, 'success'])->name('give.success')->middleware(['auth']);
 Route::get('/pesapal/ipn', [App\Http\Controllers\PaymentController::class, 'webhook'])->name('pesapal.ipn');
+Route::match(['get', 'post'], '/harakapay/callback', [App\Http\Controllers\PaymentController::class, 'harakapayCallback'])->name('harakapay.callback');
 
 // Celebration routes
 Route::prefix('celebrations')->middleware(['auth'])->group(function () {
@@ -284,5 +265,6 @@ Route::prefix('reports')->middleware(['auth'])->group(function () {
     Route::middleware(['auth'])->group(function () {
         Route::get('/settings', [App\Http\Controllers\SystemSettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [App\Http\Controllers\SystemSettingController::class, 'update'])->name('settings.update');
+        Route::post('/settings/test-sms', [App\Http\Controllers\SystemSettingController::class, 'testSms'])->name('settings.test-sms');
         Route::get('/admin/audit-logs', [App\Http\Controllers\AuditLogController::class, 'index'])->name('admin.audit-logs');
     });

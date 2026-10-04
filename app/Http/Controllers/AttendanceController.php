@@ -11,26 +11,18 @@ use Illuminate\Support\Facades\Auth;
 
 class AttendanceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
+        $isLeader = $user->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader']) 
+            || \App\Models\SmallGroup::where('leader_id', $user->id)->exists();
         
-        // Check if user is admin/staff or regular member
-        if ($user->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader'])) {
-            // Admin view - show all events with all attendance
-            $events = Event::whereDate('date', '>=', now()->subDays(30))
-                ->orderBy('date', 'desc')
-                ->with(['attendances'])
-                ->get();
-            
-            return view('attendance.index', compact('events'));
-        } else {
-            // Member view - show only their attendance
+        // If regular member without leadership privileges, show personal attendance
+        if (!$isLeader) {
             $member = $user->member;
             
             if (!$member) {
-                // User doesn't have a member profile - show empty attendance view
-                $attendances = collect(); // Empty collection
+                $attendances = collect();
                 return view('attendance.my-attendance', [
                     'attendances' => $attendances,
                     'member' => (object) ['full_name' => $user->name]
@@ -44,25 +36,278 @@ class AttendanceController extends Controller
             
             return view('attendance.my-attendance', compact('attendances', 'member'));
         }
+
+        // =========================================================================
+        // EXECUTIVE ATTENDANCE DASHBOARD FOR LEADERS
+        // =========================================================================
+        
+        // 1. Week Range Calculation
+        $weekOffset = (int) $request->get('week_offset', 0);
+        if ($request->filled('week_start')) {
+            $selectedWeekStart = \Carbon\Carbon::parse($request->week_start)->startOfWeek(\Carbon\Carbon::MONDAY);
+        } else {
+            $selectedWeekStart = now()->addWeeks($weekOffset)->startOfWeek(\Carbon\Carbon::MONDAY);
+        }
+        $selectedWeekEnd = (clone $selectedWeekStart)->endOfWeek(\Carbon\Carbon::SUNDAY);
+
+        // 2. Active Church Members
+        $totalMembers = Member::where('status', 'active')->count();
+
+        // 3. Recent Events for switcher dropdown (last 60 days or 30 events)
+        $allRecentEvents = Event::orderBy('date', 'desc')->take(30)->get();
+
+        // 4. Events in the selected week
+        $weekEvents = Event::whereBetween('date', [$selectedWeekStart->toDateString(), $selectedWeekEnd->toDateString()])
+            ->with(['attendances.member'])
+            ->orderBy('date', 'desc')
+            ->get();
+
+        // 5. Determine Selected Event for deep-dive summary
+        $selectedEvent = null;
+        if ($request->filled('event_id')) {
+            $selectedEvent = Event::with(['attendances.member.smallGroups'])->find($request->event_id);
+        }
+
+        if (!$selectedEvent && $weekEvents->isNotEmpty()) {
+            $selectedEvent = $weekEvents->first();
+        }
+
+        if (!$selectedEvent) {
+            // Fallback to the latest event that has attendances or latest event overall
+            $selectedEvent = Event::whereDate('date', '<=', now())
+                ->has('attendances')
+                ->with(['attendances.member.smallGroups'])
+                ->orderBy('date', 'desc')
+                ->first();
+
+            if (!$selectedEvent) {
+                $selectedEvent = Event::with(['attendances.member.smallGroups'])->orderBy('date', 'desc')->first();
+            }
+        }
+
+        // 6. Calculate Specific Event Summary
+        $selectedEventStats = [
+            'present' => 0,
+            'late' => 0,
+            'absent' => 0,
+            'total_attended' => 0,
+            'rate' => 0,
+            'male' => 0,
+            'female' => 0,
+            'visitors' => 0,
+            'present_attendances' => collect(),
+            'absent_members' => collect(),
+        ];
+
+        if ($selectedEvent) {
+            $eventAttendances = $selectedEvent->attendances;
+            $present = $eventAttendances->where('status', 'present');
+            $late = $eventAttendances->where('status', 'late');
+            $absent = $eventAttendances->where('status', 'absent');
+
+            $totalAttended = $present->count() + $late->count();
+            $rate = $totalMembers > 0 ? round(($totalAttended / $totalMembers) * 100, 1) : 0;
+
+            // Demographics of attendees
+            $male = $eventAttendances->whereIn('status', ['present', 'late'])->filter(function ($att) {
+                $gender = strtolower($att->member->gender ?? '');
+                return in_array($gender, ['male', 'm', 'me', 'mwanaume']);
+            })->count();
+
+            $female = $eventAttendances->whereIn('status', ['present', 'late'])->filter(function ($att) {
+                $gender = strtolower($att->member->gender ?? '');
+                return in_array($gender, ['female', 'f', 'ke', 'mwanamke']);
+            })->count();
+
+            // Visitors on the event date
+            $visitorsCount = \App\Models\Visitor::whereDate('visit_date', $selectedEvent->date)->count();
+
+            // Absent active members (who did not attend this service)
+            $attendedMemberIds = $eventAttendances->whereIn('status', ['present', 'late'])->pluck('member_id')->toArray();
+            $absentMembers = Member::where('status', 'active')
+                ->whereNotIn('id', $attendedMemberIds)
+                ->with('smallGroups')
+                ->orderBy('first_name')
+                ->take(50)
+                ->get();
+
+            $selectedEventStats = [
+                'present' => $present->count(),
+                'late' => $late->count(),
+                'absent' => $absent->count(),
+                'total_attended' => $totalAttended,
+                'rate' => $rate,
+                'male' => $male,
+                'female' => $female,
+                'visitors' => $visitorsCount,
+                'present_attendances' => $eventAttendances->whereIn('status', ['present', 'late']),
+                'absent_members' => $absentMembers,
+            ];
+        }
+
+        // 7. Calculate Week-Level Summary
+        $weekTotalAttended = 0;
+        $weekMemberIds = [];
+        foreach ($weekEvents as $we) {
+            $attended = $we->attendances->whereIn('status', ['present', 'late']);
+            $weekTotalAttended += $attended->count();
+            foreach ($attended as $att) {
+                $weekMemberIds[$att->member_id] = true;
+            }
+        }
+        $weekUniqueMembersCount = count($weekMemberIds);
+        $weekEventsCount = $weekEvents->count();
+        $weekAvg = $weekEventsCount > 0 ? round($weekTotalAttended / $weekEventsCount) : 0;
+        $weekRate = $totalMembers > 0 ? round(($weekUniqueMembersCount / $totalMembers) * 100, 1) : 0;
+
+        $weekStats = [
+            'total_attended' => $weekTotalAttended,
+            'unique_members' => $weekUniqueMembersCount,
+            'events_count' => $weekEventsCount,
+            'avg_attendance' => $weekAvg,
+            'rate' => $weekRate,
+        ];
+
+        // 8. Zone / Small Group Weekly Meeting Attendance Summary
+        $smallGroups = \App\Models\SmallGroup::with(['leader', 'members'])->get();
+        $zoneMeetingStats = $smallGroups->map(function ($group) use ($selectedWeekStart, $selectedWeekEnd) {
+            $meeting = \App\Models\SmallGroupMeeting::where('small_group_id', $group->id)
+                ->whereBetween('meeting_date', [
+                    $selectedWeekStart->startOfDay(),
+                    $selectedWeekEnd->endOfDay()
+                ])
+                ->with('attendances')
+                ->latest('meeting_date')
+                ->first();
+
+            $groupMembersCount = $group->members->count();
+            $attendedCount = 0;
+            $status = 'pending';
+
+            if ($meeting) {
+                $attendedCount = $meeting->attendees_count ?: $meeting->attendances->where('status', 'present')->count();
+                $status = 'recorded';
+            }
+
+            $rate = $groupMembersCount > 0 ? round(($attendedCount / $groupMembersCount) * 100) : 0;
+
+            return [
+                'group' => $group,
+                'leader_name' => $group->leader->full_name ?? ($group->leader->name ?? 'Haijajazwa'),
+                'total_members' => $groupMembersCount,
+                'attended' => $attendedCount,
+                'rate' => $rate,
+                'status' => $status,
+                'meeting' => $meeting,
+            ];
+        });
+
+        // 9. Trend Chart Data (Last 8 past events)
+        $trendEvents = Event::where('date', '<=', now())
+            ->has('attendances')
+            ->with('attendances')
+            ->orderBy('date', 'desc')
+            ->take(8)
+            ->get()
+            ->reverse();
+
+        if ($trendEvents->isEmpty()) {
+            $trendEvents = Event::with('attendances')->orderBy('date', 'desc')->take(8)->get()->reverse();
+        }
+
+        $trendLabels = $trendEvents->map(function ($e) {
+            return $e->date->format('d/m') . ' - ' . \Illuminate\Support\Str::limit($e->name, 10);
+        })->values()->toArray();
+
+        $trendData = $trendEvents->map(function ($e) {
+            return $e->attendances->whereIn('status', ['present', 'late'])->count();
+        })->values()->toArray();
+
+        // 10. Pass all variables to view
+        return view('attendance.index', compact(
+            'totalMembers',
+            'weekOffset',
+            'selectedWeekStart',
+            'selectedWeekEnd',
+            'weekEvents',
+            'allRecentEvents',
+            'selectedEvent',
+            'selectedEventStats',
+            'weekStats',
+            'zoneMeetingStats',
+            'trendLabels',
+            'trendData'
+        ));
     }
 
-    public function show(Event $event)
+    /**
+     * Entry point for manual attendance recording from sidebar or dashboard
+     */
+    public function recordManual(Request $request)
     {
-        // Only admins can access the manual marking interface
-        if (!auth()->user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader'])) {
-            return redirect()->route('attendance.index')->with('error', 'You do not have permission to access this page.');
+        $user = auth()->user();
+        if (!$user->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader']) && !\App\Models\SmallGroup::where('leader_id', $user->id)->exists()) {
+            return redirect()->route('attendance.index')->with('error', 'Huna ruhusa ya kurekodi mahudhurio.');
         }
-        
+
+        $allEvents = Event::orderBy('date', 'desc')->take(30)->get();
+
+        $event = null;
+        if ($request->filled('event_id')) {
+            $event = Event::find($request->event_id);
+        }
+
+        if (!$event) {
+            // Check today's event
+            $event = Event::whereDate('date', today())->first();
+        }
+
+        if (!$event) {
+            // Find closest event
+            $event = Event::whereDate('date', '>=', today())->orderBy('date', 'asc')->first() 
+                ?? Event::orderBy('date', 'desc')->first();
+        }
+
+        if (!$event) {
+            return redirect()->route('events.create')->with('info', 'Tafadhali unda ibada au tukio kwanza ili uweze kurekodi mahudhurio.');
+        }
+
         $attendances = Attendance::where('event_id', $event->id)
             ->with('member')
             ->get()
             ->keyBy('member_id');
 
         $members = Member::where('status', 'active')
+            ->with('smallGroups')
             ->orderBy('full_name')
             ->get();
 
-        return view('attendance.show', compact('event', 'attendances', 'members'));
+        $smallGroups = \App\Models\SmallGroup::all();
+
+        return view('attendance.show', compact('event', 'allEvents', 'attendances', 'members', 'smallGroups'));
+    }
+
+    public function show(Event $event)
+    {
+        if (!auth()->user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader']) && !\App\Models\SmallGroup::where('leader_id', auth()->id())->exists()) {
+            return redirect()->route('attendance.index')->with('error', 'Huna ruhusa ya kufikia ukurasa huu.');
+        }
+        
+        $allEvents = Event::orderBy('date', 'desc')->take(30)->get();
+
+        $attendances = Attendance::where('event_id', $event->id)
+            ->with('member')
+            ->get()
+            ->keyBy('member_id');
+
+        $members = Member::where('status', 'active')
+            ->with('smallGroups')
+            ->orderBy('full_name')
+            ->get();
+
+        $smallGroups = \App\Models\SmallGroup::all();
+
+        return view('attendance.show', compact('event', 'allEvents', 'attendances', 'members', 'smallGroups'));
     }
 
     public function markAttendance(Request $request, Event $event)

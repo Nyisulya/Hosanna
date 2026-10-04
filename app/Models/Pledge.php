@@ -46,7 +46,11 @@ class Pledge extends Model
             $pledge->loadMissing('member');
             if ($pledge->member && $pledge->member->phone) {
                 $member = $pledge->member;
-                $message = "Bwana asifiwe " . $member->full_name . "! Ahadi yako ya \"" . $pledge->purpose . "\" ya kiasi cha Shs " . number_format($pledge->amount) . " imesajiliwa kikamilifu. Mungu akubariki sana kwa kuunga mkono kazi ya Bwana!";
+                $message = \App\Services\SmsService::buildPledgeCreatedMessage(
+                    $member->full_name,
+                    $pledge->purpose,
+                    $pledge->amount
+                );
                 try {
                     \App\Services\SmsService::send($member->phone, $message);
                 } catch (\Exception $e) {

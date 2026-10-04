@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password - Manzese Seventh Day Adventist Church</title>
+    <title>Reset Password - {{ $churchName ?? config('app.name', 'Hosanna International Church') }}</title>
     
     <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -190,7 +190,7 @@
                 <div class="church-logo">
                     <img src="{{ asset('images/sda-logo.png') }}" alt="SDA Logo" style="width: 90px; height: 90px; object-fit: contain;">
                 </div>
-                <div class="church-name">MANZESE SDA CHURCH</div>
+                <div class="church-name">{{ $churchName ?? config('app.name', 'Hosanna International Church') }}</div>
                 <div class="church-tagline">{{ __('Reset Password') }}</div>
             </div>
             
@@ -244,7 +244,7 @@
                 </form>
                 
                 <div class="footer-text">
-                    &copy; {{ date('Y') }} Manzese Seventh Day Adventist Church
+                    &copy; {{ date('Y') }} {{ $churchName ?? config('app.name', 'Hosanna International Church') }}
                 </div>
             </div>
         </div>

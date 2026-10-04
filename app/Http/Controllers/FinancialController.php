@@ -242,7 +242,7 @@ class FinancialController extends Controller
                         }
                     }
                     
-                    $lines[] = $catShort . $pledgeLabel . ":" . number_format($amount);
+                    $lines[] = $catShort . $pledgeLabel . ": TZS " . number_format($amount);
                 }
                 
                 try {
@@ -251,11 +251,7 @@ class FinancialController extends Controller
                     $dateStr = date('d/m/Y');
                 }
                 
-                if (count($lines) === 1) {
-                    $message = "Bwana asifiwe " . $member->full_name . "! Tumepokea " . $lines[0] . " ya tarehe " . $dateStr . ". Mungu akubariki!";
-                } else {
-                    $message = "Bwana asifiwe " . $member->full_name . "! Tumepokea michango ya " . $dateStr . ": " . implode(", ", $lines) . ". Jumla: Shs " . number_format($grandTotal) . ". Mungu akubariki!";
-                }
+                $message = \App\Services\SmsService::buildIncomeReceiptMessage($member->full_name, $lines, $grandTotal, $dateStr);
                 
                 try {
                     \App\Services\SmsService::send($member->phone, $message);
@@ -399,7 +395,13 @@ class FinancialController extends Controller
                 $dateStr = date('d/m/Y');
             }
             
-            $message = "Bwana asifiwe " . $member->full_name . "! Tumepokea Shs " . number_format($validated['amount']) . " kwa ajili ya ahadi yako ya \"" . $pledge->purpose . "\". Salio lililobaki ni Shs " . number_format($remainingBalance) . ". Mungu akubariki!";
+            $message = \App\Services\SmsService::buildPledgePaymentMessage(
+                $member->full_name,
+                $pledge->purpose,
+                $validated['amount'],
+                $remainingBalance,
+                $dateStr
+            );
             
             try {
                 \App\Services\SmsService::send($member->phone, $message);

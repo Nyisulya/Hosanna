@@ -40,4 +40,30 @@ class SystemSettingController extends Controller
 
         return redirect()->back()->with('success', 'Settings updated successfully!');
     }
+
+    public function testSms(Request $request)
+    {
+        $phone = $request->input('test_phone');
+
+        if ($phone) {
+            $churchName = SystemSetting::where('key', 'church_name')->value('value') ?: config('app.name', 'Kanisa');
+            $testMsg = "Jaribio la SMS kutoka mfumo wa {$churchName} (SMS Gate Cloud API) limefanikiwa!";
+            $sent = \App\Services\SmsService::send($phone, $testMsg);
+
+            if ($sent) {
+                return redirect()->back()->with('success', "SMS ya majaribio imetumwa kikamilifu kwenda namba {$phone}!");
+            } else {
+                return redirect()->back()->with('error', "SMS ya majaribio imeshindikana. Tafadhali hakikisha simu imeunganishwa na internet kwenye app ya SMS Gate.");
+            }
+        }
+
+        $connection = \App\Services\SmsService::testConnection();
+        if ($connection['connected']) {
+            $deviceCount = count($connection['devices']);
+            $deviceNames = collect($connection['devices'])->pluck('name')->implode(', ');
+            return redirect()->back()->with('success', "Muunganisho na SMS Gate uko imara! Vifaa vilivyounganishwa ({$deviceCount}): {$deviceNames}");
+        }
+
+        return redirect()->back()->with('error', "Muunganisho umeshindikana: " . $connection['message']);
+    }
 }

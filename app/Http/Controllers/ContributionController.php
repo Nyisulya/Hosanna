@@ -145,7 +145,12 @@ class ContributionController extends Controller
                 default => 'Mchango',
             };
             $dateStr = $contribution->date ? $contribution->date->format('d/m/Y') : date('d/m/Y');
-            $message = "Bwana asifiwe " . $member->full_name . "! Tumepokea " . $typeLabel . " yako ya kiasi cha Shs " . number_format($contribution->amount) . " ya tarehe " . $dateStr . ". Asante sana kwa kutoa kwa ajili ya kazi ya Bwana. Mungu akubariki sana!";
+            $message = \App\Services\SmsService::buildContributionReceiptMessage(
+                $member->full_name,
+                $typeLabel,
+                $contribution->amount,
+                $dateStr
+            );
             
             try {
                 \App\Services\SmsService::send($member->phone, $message);
