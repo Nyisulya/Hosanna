@@ -16,45 +16,7 @@ class CheckProfileComplete
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Skip check for guests
-        if (!Auth::check()) {
-            return $next($request);
-        }
-
-        $user = Auth::user();
-
-        // Staff roles (e.g. accountant) are not required to complete a
-        // member profile before using the system.
-        if ($user->hasRole('accountant')) {
-            return $next($request);
-        }
-
-        // Skip check if no member profile
-        if (!$user->member) {
-            return $next($request);
-        }
-
-        // Whitelist routes that should not trigger the check
-        $whitelistedRoutes = [
-            'profile.index',
-            'profile.edit',
-            'profile.update',
-            'logout',
-        ];
-
-        // Skip check if on whitelisted routes
-        if ($request->routeIs($whitelistedRoutes)) {
-            return $next($request);
-        }
-
-        // Check if profile is complete
-        if (!$user->member->isProfileComplete()) {
-            $missingFields = $user->member->getMissingFields();
-            
-            return redirect()->route('profile.edit')
-                ->with('warning', 'Please complete your profile before accessing the system. Missing: ' . implode(', ', $missingFields));
-        }
-
+        // Allow all users to access the system freely without forced redirects
         return $next($request);
     }
 }

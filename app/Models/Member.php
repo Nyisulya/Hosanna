@@ -189,32 +189,8 @@ class Member extends Model
      */
     public function isProfileComplete(): bool
     {
-        $requiredFields = [
-            'full_name',
-            'email',
-            'phone',
-            'gender',
-            'date_of_birth',
-            'marital_status',
-            'address',
-            'salvation_date',
-            'baptism_date',
-            'emergency_contact_name',
-            'emergency_contact_phone',
-        ];
-
-        foreach ($requiredFields as $field) {
-            if (empty($this->$field)) {
-                return false;
-            }
-        }
-
-        // Check wedding date if married
-        if ($this->marital_status === 'married' && empty($this->wedding_date)) {
-            return false;
-        }
-
-        return true;
+        // Only require basic essential info (full_name)
+        return !empty($this->full_name);
     }
 
     /**
@@ -224,32 +200,6 @@ class Member extends Model
      */
     public function getMissingFields(): array
     {
-        $missing = [];
-        $requiredFields = [
-            'full_name' => 'Full Name',
-            'email' => 'Email',
-            'phone' => 'Phone Number',
-            'gender' => 'Gender',
-            'date_of_birth' => 'Date of Birth',
-            'marital_status' => 'Marital Status',
-            'address' => 'Address',
-            'salvation_date' => 'Salvation Date',
-            'baptism_date' => 'Baptism Date',
-            'emergency_contact_name' => 'Emergency Contact Name',
-            'emergency_contact_phone' => 'Emergency Contact Phone',
-        ];
-
-        foreach ($requiredFields as $field => $label) {
-            if (empty($this->$field)) {
-                $missing[] = $label;
-            }
-        }
-
-        // Check wedding date if married
-        if ($this->marital_status === 'married' && empty($this->wedding_date)) {
-            $missing[] = 'Wedding Date';
-        }
-
-        return $missing;
+        return [];
     }
 }
