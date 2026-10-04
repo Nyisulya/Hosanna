@@ -11,17 +11,7 @@ Route::get('lang/{locale}', function ($locale) {
     return back();
 })->name('lang.switch');
 
-use App\Http\Controllers\InstallerController;
 
-// Web Installer Wizard Routes
-Route::prefix('install')->group(function () {
-    Route::get('/', [InstallerController::class, 'index'])->name('install.index');
-    Route::get('/database', [InstallerController::class, 'database'])->name('install.database');
-    Route::post('/database', [InstallerController::class, 'saveDatabase'])->name('install.database.save');
-    Route::get('/admin', [InstallerController::class, 'admin'])->name('install.admin');
-    Route::post('/finish', [InstallerController::class, 'install'])->name('install.finish');
-    Route::get('/complete', [InstallerController::class, 'complete'])->name('install.complete');
-});
 
 Route::get('/', function () {
     return redirect()->route('login');

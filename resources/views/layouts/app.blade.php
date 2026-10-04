@@ -11,6 +11,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Theme style -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <!-- PWA Settings & Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Hosanna Church">
+    <link rel="apple-touch-icon" href="/images/icons/icon.svg">
+    <script src="{{ asset('js/pwa-install.js') }}?v={{ time() }}" defer></script>
+    
     <!-- TailwindCSS (for compatibility) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- NProgress for Ultra-Fast Zero-Refresh Transitions -->

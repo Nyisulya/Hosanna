@@ -11,6 +11,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Theme style -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <!-- PWA Settings & Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Hosanna Church">
+    <link rel="apple-touch-icon" href="/images/icons/icon.svg">
+    <script src="{{ asset('js/pwa-install.js') }}?v={{ time() }}" defer></script>
+    
     <!-- TailwindCSS (for compatibility with existing views) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- NProgress for Ultra-Fast Zero-Refresh Transitions -->
@@ -127,6 +137,14 @@
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+          <!-- PWA Install Sidebar Button -->
+          <li class="nav-item mb-2 pwa-install-btn">
+            <a href="javascript:void(0);" onclick="window.showPwaInstallPrompt()" class="nav-link" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white !important; border-radius: 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(16,185,129,0.35);">
+              <i class="nav-icon fas fa-mobile-alt text-white"></i>
+              <p>📲 Weka App Kwenye Simu</p>
+            </a>
+          </li>
 
           @if(Auth::user()->hasRole('accountant') && !Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'treasurer', 'department_leader']))
           {{-- ══════════════════════════════════════════════════════════ --}}

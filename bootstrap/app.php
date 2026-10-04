@@ -12,7 +12,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
-            \App\Http\Middleware\CheckIfInstalled::class,
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\CheckProfileComplete::class,
             \App\Http\Middleware\RestrictAccountantAccess::class,
