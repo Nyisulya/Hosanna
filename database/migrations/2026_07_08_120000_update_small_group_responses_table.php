@@ -12,16 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('small_group_responses', function (Blueprint $table) {
-            // Drop the old foreign keys to change the columns
-            // Actually, in PostgreSQL we can just alter columns to drop NOT NULL constraint.
-            // Laravel table change() does this automatically.
             $table->unsignedBigInteger('member_id')->nullable()->change();
             $table->unsignedBigInteger('small_group_id')->nullable()->change();
             
-            // Drop unique constraint to allow multiple group reports (which have member_id = null)
-            // we will handle validation in PHP.
             try {
-                $table->dropUnique('unique_member_week_question');
+                // In MySQL, drop foreign key first before dropping composite unique index
+                if (Schema::getConnection()->getDriverName() === 'mysql') {
+                    $table->dropForeign(['member_id']);
+                    $table->dropUnique('unique_member_week_question');
+                    $table->foreign('member_id')->references('id')->on('members')->onDelete('cascade');
+                } else {
+                    $table->dropUnique('unique_member_week_question');
+                }
             } catch (\Exception $e) {
                 // Ignore if constraint doesn't exist
             }
