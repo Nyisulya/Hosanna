@@ -84,7 +84,7 @@
             <div style="background: linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 100%); color: white; border-radius: 20px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
                 <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 14px;">
                     <div style="width: 52px; height: 52px; border-radius: 14px; background: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(0,0,0,0.25); flex-shrink: 0;">
-                        <img src="/images/icons/icon.svg" alt="App Icon" style="width: 40px; height: 40px; border-radius: 10px;" onerror="this.src='/images/sda-logo.png'">
+                        <img src="/images/icons/icon-192.png" alt="App Icon" style="width: 40px; height: 40px; border-radius: 10px; object-fit: contain;" onerror="this.src='/images/church-logo.png'">
                     </div>
                     <div style="flex-grow: 1;">
                         <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: #ffffff; line-height: 1.2;">Weka App ya Kanisa Kwenye Simu</h4>

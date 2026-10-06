@@ -54,8 +54,9 @@
   <!-- Navbar -->
   <nav class="main-header navbar navbar-expand-md navbar-light navbar-white">
     <div class="container">
-      <a href="{{ url('/') }}" class="navbar-brand">
-        <span class="brand-text font-weight-light">{{ config('app.name', 'Church Management') }}</span>
+      <a href="{{ url('/') }}" class="navbar-brand d-flex align-items-center">
+        <img src="{{ isset($churchLogo) ? (str_starts_with($churchLogo, 'images/') ? asset($churchLogo) : asset('storage/' . $churchLogo)) : asset('images/church-logo.png') }}" alt="Logo" class="mr-2" style="height: 32px; width: 32px; object-fit: contain; background: #fff; border-radius: 50%; padding: 2px;">
+        <span class="brand-text font-weight-bold" style="color:#1e3a8a;">{{ $churchName ?? config('app.name', 'Hosanna Church') }}</span>
       </a>
 
       <button class="navbar-toggler order-1" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">

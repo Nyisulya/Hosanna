@@ -221,7 +221,7 @@
                     </a>
                 </div>
                 <div class="church-logo">
-                    <img src="{{ asset('images/sda-logo.png') }}" alt="SDA Logo" style="width: 90px; height: 90px; object-fit: contain;">
+                    <img src="{{ isset($churchLogo) ? (str_starts_with($churchLogo, 'images/') ? asset($churchLogo) : asset('storage/' . $churchLogo)) : asset('images/church-logo.png') }}" alt="{{ $churchName ?? 'Church Logo' }}" style="width: 90px; height: 90px; object-fit: contain;">
                 </div>
                 <div class="church-name">{{ $churchName ?? config('app.name', 'Hosanna International Church') }}</div>
                 <div class="church-tagline">{{ __('Church Management System') }}</div>

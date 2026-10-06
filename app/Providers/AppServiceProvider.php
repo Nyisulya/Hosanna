@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
             $view->with('churchPhone', $settings['church_phone'] ?? '');
             $view->with('churchEmail', $settings['church_email'] ?? 'info@hosannachurch.org');
             $view->with('currencySymbol', $settings['currency_symbol'] ?? 'TZS');
-            $view->with('churchLogo', $settings['church_logo'] ?? 'images/sda-logo.png');
+            $view->with('churchLogo', $settings['church_logo'] ?? 'images/church-logo.png');
 
             // Global Notifications (only if authenticated)
             if (\Illuminate\Support\Facades\Auth::check()) {

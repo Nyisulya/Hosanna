@@ -72,34 +72,6 @@
                     </div>
                 </div>
 
-                @if($member)
-                    <!-- QR Code Card -->
-                    <div class="card card-primary card-outline shadow-sm mt-3">
-                        <div class="card-header text-center py-2 bg-light">
-                            <h5 class="card-title m-0 font-weight-bold text-md text-primary">
-                                <i class="fas fa-qrcode mr-1"></i> {{ __('My QR Code') }}
-                            </h5>
-                        </div>
-                        <div class="card-body text-center p-3">
-                            <div class="d-inline-block p-3 bg-white rounded shadow-sm border mb-2">
-                                {!! QrCode::size(150)->generate($member->qr_code_content) !!}
-                            </div>
-                            <p class="text-xs text-muted mb-3">
-                                <i class="fas fa-info-circle mr-1"></i> {{ __('Scan this QR code for church attendance') }}
-                            </p>
-                            
-                            <!-- Download and Print Buttons -->
-                            <div class="btn-group w-100" role="group">
-                                <a href="{{ route('profile.qr-download') }}" class="btn btn-outline-primary btn-sm w-50">
-                                    <i class="fas fa-download mr-1"></i> {{ __('Download') }}
-                                </a>
-                                <button type="button" class="btn btn-outline-secondary btn-sm w-50" onclick="printQR()">
-                                    <i class="fas fa-print mr-1"></i> {{ __('Print') }}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                @endif
             </div>
 
             <!-- Right Column: Detailed Information -->
@@ -155,69 +127,6 @@
                                     @endif
                                 </tbody>
                             </table>
-                        </div>
-                    </div>
-
-                    <!-- Spiritual Journey & Emergency Contacts Row -->
-                    <div class="row mt-3">
-                        <!-- Spiritual Journey Card -->
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <div class="card card-primary card-outline shadow-sm h-100 mb-0">
-                                <div class="card-header bg-light py-2">
-                                    <h3 class="card-title font-weight-bold text-primary text-sm mb-0">
-                                        <i class="fas fa-cross mr-1"></i> {{ __('Spiritual Journey') }}
-                                    </h3>
-                                </div>
-                                <div class="card-body p-0">
-                                    <table class="table table-striped table-hover mb-0">
-                                        <tbody>
-                                            <tr>
-                                                <td width="50%"><strong><i class="fas fa-praying-hands mr-2 text-muted"></i> {{ __('Salvation Date') }}</strong></td>
-                                                <td>
-                                                    @if($member->salvation_date)
-                                                        {{ $member->salvation_date->format('F d, Y') }}
-                                                        <br>
-                                                        <small class="text-muted">({{ $member->years_since_salvation }} {{ __('years in faith') }})</small>
-                                                    @else
-                                                        {{ __('Not provided') }}
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong><i class="fas fa-water mr-2 text-muted"></i> {{ __('Baptism Date') }}</strong></td>
-                                                <td>
-                                                    {{ $member->baptism_date ? $member->baptism_date->format('F d, Y') : __('Not provided') }}
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Emergency Contact Card -->
-                        <div class="col-md-6">
-                            <div class="card card-primary card-outline shadow-sm h-100 mb-0">
-                                <div class="card-header bg-light py-2">
-                                    <h3 class="card-title font-weight-bold text-primary text-sm mb-0">
-                                        <i class="fas fa-exclamation-triangle mr-1"></i> {{ __('Emergency Contact') }}
-                                    </h3>
-                                </div>
-                                <div class="card-body p-0">
-                                    <table class="table table-striped table-hover mb-0">
-                                        <tbody>
-                                            <tr>
-                                                <td width="40%"><strong><i class="fas fa-user mr-2 text-muted"></i> {{ __('Name') }}</strong></td>
-                                                <td>{{ $member->emergency_contact_name ?? __('Not provided') }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong><i class="fas fa-phone mr-2 text-muted"></i> {{ __('Phone') }}</strong></td>
-                                                <td>{{ $member->emergency_contact_phone ?? __('Not provided') }}</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
@@ -284,47 +193,4 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-function printQR() {
-    // Create a new window
-    const printWindow = window.open('', '', 'height=600,width=800');
-    
-    // Get QR code SVG
-    const qrCodeElement = document.querySelector('.card-body svg');
-    const memberNumber = '{{ $member->member_number ?? '' }}';
-    const memberName = '{{ $user->name ?? '' }}';
-    
-    if(!qrCodeElement) {
-        alert('QR code not found');
-        return;
-    }
-    
-    // Write content to print window
-    printWindow.document.write('<html><head><title>My QR Code</title>');
-    printWindow.document.write('<style>');
-    printWindow.document.write('body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }');
-    printWindow.document.write('h2 { margin-bottom: 10px; }');
-    printWindow.document.write('p { color: #666; margin: 5px 0; }');
-    printWindow.document.write('.qr-container { margin: 20px auto; }');
-    printWindow.document.write('</style></head><body>');
-    printWindow.document.write('<h2>' + memberName + '</h2>');
-    printWindow.document.write('<p>Member #: ' + memberNumber + '</p>');
-    printWindow.document.write('<div class="qr-container">');
-    printWindow.document.write(qrCodeElement.outerHTML);
-    printWindow.document.write('</div>');
-    printWindow.document.write('<p>Scan this code for attendance</p>');
-    printWindow.document.write('</body></html>');
-    
-    printWindow.document.close();
-    printWindow.focus();
-    
-    // Trigger print after content is loaded
-    setTimeout(function() {
-        printWindow.print();
-        printWindow.close();
-    }, 250);
-}
-</script>
-@endpush
 @endsection

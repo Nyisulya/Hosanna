@@ -73,9 +73,12 @@
                                 <div class="form-group">
                                     <label>Current Logo</label><br>
                                     @if(isset($settings['church_logo']))
-                                        <img src="{{ asset('storage/' . $settings['church_logo']) }}" alt="Church Logo" style="max-height: 100px; border: 1px solid #ddd; padding: 5px; border-radius: 5px;">
+                                        @php
+                                            $currLogo = str_starts_with($settings['church_logo'], 'images/') ? asset($settings['church_logo']) : asset('storage/' . $settings['church_logo']);
+                                        @endphp
+                                        <img src="{{ $currLogo }}" alt="Church Logo" style="max-height: 100px; border: 1px solid #ddd; padding: 5px; border-radius: 5px; background: #fff;">
                                     @else
-                                        <p class="text-muted">No logo uploaded</p>
+                                        <img src="{{ asset('images/church-logo.png') }}" alt="Church Logo" style="max-height: 100px; border: 1px solid #ddd; padding: 5px; border-radius: 5px; background: #fff;">
                                     @endif
                                 </div>
                             </div>

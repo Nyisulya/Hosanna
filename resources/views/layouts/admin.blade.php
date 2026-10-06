@@ -128,9 +128,10 @@
   <!-- Main Sidebar Container -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Header -->
-    <div class="brand-link text-center" style="background:#1e3a8a; padding: 10px 10px; height: 57px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(255,255,255,0.15);">
-      <span class="brand-text font-weight-bold" style="color:white; font-size:12px; letter-spacing: 0.08em; text-transform: uppercase;">{{ $churchName ?? config('app.name', 'HOSANNA INTERNATIONAL CHURCH') }}</span>
-    </div>
+    <a href="{{ route('dashboard') }}" class="brand-link text-center" style="background:#1e3a8a; padding: 8px 12px; height: 57px; display: flex; align-items: center; justify-content: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.15); text-decoration: none;">
+      <img src="{{ isset($churchLogo) ? (str_starts_with($churchLogo, 'images/') ? asset($churchLogo) : asset('storage/' . $churchLogo)) : asset('images/church-logo.png') }}" alt="Logo" style="height: 34px; width: 34px; object-fit: contain; background: #fff; border-radius: 50%; padding: 2px; flex-shrink: 0;">
+      <span class="brand-text font-weight-bold" style="color:white; font-size:12px; letter-spacing: 0.06em; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $churchName ?? config('app.name', 'HOSANNA INTERNATIONAL CHURCH') }}</span>
+    </a>
 
     <!-- Sidebar -->
     <div class="sidebar">

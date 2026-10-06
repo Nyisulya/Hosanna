@@ -32,6 +32,14 @@ Route::post('reset-password', [ForgotPasswordController::class, 'reset'])->name(
 // Language switching route
 Route::get('language/{locale}', [App\Http\Controllers\LanguageController::class, 'switch'])->name('language.switch');
 
+// Public self-registration (no login required) - basic data collection
+use App\Http\Controllers\PublicRegistrationController;
+Route::get('jiunge', [PublicRegistrationController::class, 'showForm'])->name('public.register');
+Route::post('jiunge', [PublicRegistrationController::class, 'store'])
+    ->middleware('throttle:10,1')
+    ->name('public.register.store');
+Route::get('jiunge/asante', [PublicRegistrationController::class, 'success'])->name('public.register.success');
+
 use App\Http\Controllers\Auth\RegisterController;
 
 // Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');

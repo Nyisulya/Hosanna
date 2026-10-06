@@ -636,7 +636,7 @@ class ChurchDemoSeeder extends Seeder
             'church_phone'    => '+255 754 001 000',
             'church_email'    => 'info@hosannachurch.org',
             'currency_symbol' => 'TZS',
-            'church_logo'     => 'images/sda-logo.png',
+            'church_logo'     => 'images/church-logo.png',
         ];
         foreach ($settings as $key => $val) {
             DB::table('system_settings')->updateOrInsert(
