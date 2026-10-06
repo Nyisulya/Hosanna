@@ -131,7 +131,8 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
+    function initMemberAutocomplete() {
     var searchInput = document.getElementById('member_search');
     var suggestionsContainer = document.getElementById('member_suggestions');
     var hiddenInput = document.getElementById('member_id_hidden');
@@ -346,6 +347,15 @@ document.addEventListener('DOMContentLoaded', function() {
         updateTotalSum();
         searchInput.focus();
     });
-});
+    }
+
+    // Run immediately when injected by the SPA engine, or on DOMContentLoaded
+    // for a normal full-page load.
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMemberAutocomplete);
+    } else {
+        initMemberAutocomplete();
+    }
+})();
 </script>
 @endsection
