@@ -30,6 +30,13 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
+        // Implicitly grant 'super_admin' and 'admin' roles all permissions
+        Gate::before(function ($user, $ability) {
+            if (method_exists($user, 'hasAnyRole') && $user->hasAnyRole(['super_admin', 'admin'])) {
+                return true;
+            }
+        });
+
         // Role‑based gates
         // Role‑based gates -> Permission-based gates
         Gate::define('approve-members', function ($user) {

@@ -8,10 +8,20 @@ use Illuminate\Support\Facades\Auth;
 
 class ChurchAnnouncementController extends Controller
 {
+    protected function authorizeAnnouncement(string $permission): void
+    {
+        $user = Auth::user();
+        if ($user && ($user->hasAnyRole(['super_admin', 'admin']) || $user->can($permission))) {
+            return;
+        }
+
+        abort(403, 'Hauna ruhusa ya kufikia ukurasa huu.');
+    }
+
     // List all general announcements
     public function index()
     {
-        abort_unless(Auth::user()->can('announcement-view'), 403);
+        $this->authorizeAnnouncement('announcement-view');
 
         // Mark announcements as viewed
         if (Auth::check()) {
@@ -30,7 +40,7 @@ class ChurchAnnouncementController extends Controller
     // Show create form
     public function create()
     {
-        abort_unless(Auth::user()->can('announcement-create'), 403);
+        $this->authorizeAnnouncement('announcement-create');
 
         return view('announcements.create');
     }
@@ -38,7 +48,7 @@ class ChurchAnnouncementController extends Controller
     // Store new announcement
     public function store(Request $request)
     {
-        abort_unless(Auth::user()->can('announcement-create'), 403);
+        $this->authorizeAnnouncement('announcement-create');
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -62,7 +72,7 @@ class ChurchAnnouncementController extends Controller
     // Show single announcement
     public function show(Announcement $announcement)
     {
-        abort_unless(Auth::user()->can('announcement-view'), 403);
+        $this->authorizeAnnouncement('announcement-view');
 
         return view('announcements.show', compact('announcement'));
     }
@@ -70,7 +80,7 @@ class ChurchAnnouncementController extends Controller
     // Show edit form
     public function edit(Announcement $announcement)
     {
-        abort_unless(Auth::user()->can('announcement-edit'), 403);
+        $this->authorizeAnnouncement('announcement-edit');
 
         return view('announcements.edit', compact('announcement'));
     }
@@ -78,7 +88,7 @@ class ChurchAnnouncementController extends Controller
     // Update announcement
     public function update(Request $request, Announcement $announcement)
     {
-        abort_unless(Auth::user()->can('announcement-edit'), 403);
+        $this->authorizeAnnouncement('announcement-edit');
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -99,7 +109,7 @@ class ChurchAnnouncementController extends Controller
     // Delete announcement
     public function destroy(Announcement $announcement)
     {
-        abort_unless(Auth::user()->can('announcement-delete'), 403);
+        $this->authorizeAnnouncement('announcement-delete');
 
         $announcement->delete();
 

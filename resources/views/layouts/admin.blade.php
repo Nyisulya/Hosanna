@@ -263,8 +263,9 @@
           <li class="nav-header" style="letter-spacing:0.08em;font-size:0.68rem;color:rgba(255,255,255,0.45);padding:12px 15px 4px;text-transform:uppercase;">{{ __('Church Life') }}</li>
 
           {{-- Announcements --}}
+          @if(Auth::user()->can('announcement-view') || Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader', 'secretary']))
           <li class="nav-item">
-            @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader', 'secretary']))
+            @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader', 'secretary']) || Auth::user()->can('announcement-create'))
             <a href="{{ route('announcements.index') }}" class="nav-link {{ request()->routeIs('announcements.*') ? 'active' : '' }}">
             @else
             <a href="{{ route('announcements.member-view') }}" class="nav-link {{ request()->routeIs('announcements.*') ? 'active' : '' }}">
@@ -277,6 +278,7 @@
               </p>
             </a>
           </li>
+          @endif
 
           {{-- Matukio (Events Only) --}}
           <li class="nav-item">
