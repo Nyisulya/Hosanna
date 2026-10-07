@@ -198,6 +198,102 @@ class MemberController extends Controller
     }
 
     /**
+     * Bulk send login credentials SMS to all members or test phone.
+     */
+    public function bulkSendCredentialsSms(\Illuminate\Http\Request $request): RedirectResponse
+    {
+        $this->authorize('create', Member::class);
+
+        $testPhone = $request->input('test_phone');
+        $sendToAll = $request->boolean('send_to_all');
+        $defaultPassword = 'password123';
+
+        if (!empty($testPhone)) {
+            $sampleMember = Member::whereNotNull('phone')->first();
+            $name = $sampleMember ? $sampleMember->full_name : 'Mshiriki wa Kanisa';
+            $email = $sampleMember ? $sampleMember->email : 'mshiriki@hosannachurch.org';
+
+            $sent = \App\Services\SmsService::sendRegistrationWelcome(
+                $testPhone,
+                $name,
+                $email,
+                $defaultPassword
+            );
+
+            if ($sent) {
+                return back()->with('status', "SMS ya majaribio imetumwa kikamilifu kwenda {$testPhone}!");
+            }
+            return back()->with('error', "Imeshindwa kutuma SMS kwa {$testPhone}. Hakikisha kifaa cha SMS Gate kipo mtandaoni.");
+        }
+
+        if (!$sendToAll) {
+            return back()->with('error', 'Tafadhali chagua kutuma kwa wote au weka namba ya simu ya majaribio.');
+        }
+
+        $members = Member::whereNotNull('phone')->where('phone', '!=', '')->get();
+        $sentCount = 0;
+
+        foreach ($members as $member) {
+            try {
+                if (empty($member->email)) {
+                    $baseSlug = \Illuminate\Support\Str::slug($member->full_name, '.');
+                    if (empty($baseSlug)) {
+                        $baseSlug = 'mshiriki';
+                    }
+                    $candidate = $baseSlug . $member->id . '@hosannachurch.org';
+                    while (Member::where('email', $candidate)->where('id', '!=', $member->id)->exists() 
+                        || \App\Models\User::where('email', $candidate)->exists()) {
+                        $candidate = $baseSlug . rand(1000, 9999) . '@hosannachurch.org';
+                    }
+                    $member->email = $candidate;
+                    $member->saveQuietly();
+                }
+
+                $user = $member->user;
+                if (!$user) {
+                    \App\Models\User::$createMemberProfile = false;
+                    try {
+                        $user = \App\Models\User::firstOrCreate(
+                            ['email' => $member->email],
+                            [
+                                'name'     => $member->full_name,
+                                'password' => \Illuminate\Support\Facades\Hash::make($defaultPassword),
+                            ]
+                        );
+                    } finally {
+                        \App\Models\User::$createMemberProfile = true;
+                    }
+                    if (!$user->hasAnyRole(\Spatie\Permission\Models\Role::all())) {
+                        $user->assignRole('member');
+                    }
+                    $member->user_id = $user->id;
+                    $member->saveQuietly();
+                } else {
+                    $user->password = \Illuminate\Support\Facades\Hash::make($defaultPassword);
+                    $user->saveQuietly();
+                }
+
+                $sent = \App\Services\SmsService::sendRegistrationWelcome(
+                    $member->phone,
+                    $member->full_name,
+                    $user->email,
+                    $defaultPassword
+                );
+
+                if ($sent) {
+                    $sentCount++;
+                }
+
+                usleep(500000); // 0.5s pause
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error("Bulk credentials SMS error on member #{$member->id}: " . $e->getMessage());
+            }
+        }
+
+        return back()->with('status', "SMS za taarifa za kuingia kwenye mfumo zimetumwa kikamilifu kwa washiriki {$sentCount}!");
+    }
+
+    /**
      * Display the specified resource.
      */
     public function show(Member $member): View

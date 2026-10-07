@@ -14,6 +14,9 @@
         </div>
         <div class="col-md-6 text-right">
             @can('create', App\Models\Member::class)
+            <button type="button" class="btn btn-outline-info mr-2" data-toggle="modal" data-target="#bulkSmsModal">
+                <i class="fas fa-sms"></i> {{ __('Tuma SMS za Kuingia') }}
+            </button>
             <a href="{{ route('members.import') }}" class="btn btn-success mr-2">
                 <i class="fas fa-file-upload"></i> {{ __('Import Members') }}
             </a>
@@ -209,6 +212,16 @@
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 @endcan
+                                @can('create', App\Models\Member::class)
+                                @if($member->phone)
+                                <form action="{{ route('members.send-credentials-sms', $member) }}" method="POST" class="d-inline" onsubmit="return confirm('Je, una uhakika unataka kumtumia {{ $member->full_name }} SMS ya taarifa za kuingia kwenye mfumo?');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="{{ __('Tuma SMS ya Kuingia') }}">
+                                        <i class="fas fa-sms"></i>
+                                    </button>
+                                </form>
+                                @endif
+                                @endcan
                                 @can('delete', $member)
                                 <form action="{{ route('members.destroy', $member) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Are you sure you want to delete this member?') }}');">
                                     @csrf
@@ -246,5 +259,57 @@
     </div>
     @endif
     @endif
+</div>
+
+<!-- Modal ya Kutuma SMS za Kuingia -->
+<div class="modal fade" id="bulkSmsModal" tabindex="-1" role="dialog" aria-labelledby="bulkSmsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form action="{{ route('members.bulk-send-credentials-sms') }}" method="POST">
+                @csrf
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="bulkSmsModalLabel">
+                        <i class="fas fa-sms mr-2"></i> Tuma SMS za Kuingia (Credentials & Link)
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle mr-1"></i> SMS hii inamkaribisha mshiriki na kumpa <strong>Email</strong>, <strong>Nenosiri (password123)</strong>, na kiungo cha <strong>https://hossana.nyisu.com</strong>.
+                    </div>
+
+                    <div class="card mb-3 border-info">
+                        <div class="card-body">
+                            <h6 class="font-weight-bold text-info"><i class="fas fa-vial mr-1"></i> Chaguo 1: Jaribu Kwanza (Test SMS)</h6>
+                            <p class="small text-muted mb-2">Tuma SMS ya majaribio kwenye namba yako ya simu kwanza kabla ya kutuma kwa wote.</p>
+                            <div class="form-group mb-0">
+                                <label for="test_phone" class="small font-weight-bold">Namba ya Majaribio:</label>
+                                <input type="text" name="test_phone" id="test_phone" class="form-control form-control-sm" placeholder="Mfano: 0756670798">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-warning">
+                        <div class="card-body">
+                            <h6 class="font-weight-bold text-danger"><i class="fas fa-users mr-1"></i> Chaguo 2: Tuma kwa Washiriki Wote</h6>
+                            <p class="small text-muted mb-2">Tuma SMS kwa washiriki wote wenye namba za simu waliosajiliwa kwenye mfumo.</p>
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="send_to_all" name="send_to_all" value="1">
+                                <label class="custom-control-label text-dark font-weight-bold" for="send_to_all">Nathibitisha kutuma kwa washiriki wote</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Ghairi</button>
+                    <button type="submit" class="btn btn-primary" onclick="return confirm('Je, una uhakika unataka kutekeleza hatua hii?');">
+                        <i class="fas fa-paper-plane mr-1"></i> Tuma Sasa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 @endsection
