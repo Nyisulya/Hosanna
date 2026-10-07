@@ -192,7 +192,10 @@
                     </h5>
                     @if($selectedEvent)
                         <small class="text-muted">
-                            <i class="far fa-calendar-check mr-1"></i> Tarehe: <strong>{{ $selectedEvent->date->format('d/m/Y') }}</strong> ({{ $selectedEvent->date->translatedFormat('l') }})
+                            <i class="far fa-calendar-check mr-1"></i> Tarehe: <strong>{{ $selectedEvent->date ? \Carbon\Carbon::parse($selectedEvent->date)->format('d/m/Y') : '-' }}</strong> 
+                            @if($selectedEvent->date)
+                                ({{ \Carbon\Carbon::parse($selectedEvent->date)->translatedFormat('l') }})
+                            @endif
                             @if($selectedEvent->start_time)
                                 | <i class="far fa-clock mr-1"></i> Saa: <strong>{{ \Carbon\Carbon::parse($selectedEvent->start_time)->format('h:i A') }}</strong>
                             @endif
@@ -211,7 +214,7 @@
                         <select name="event_id" id="event_id" class="form-control form-control-sm font-weight-bold border-primary shadow-sm" onchange="this.form.submit()">
                             @forelse($allRecentEvents as $ev)
                                 <option value="{{ $ev->id }}" {{ ($selectedEvent && $selectedEvent->id == $ev->id) ? 'selected' : '' }}>
-                                    {{ $ev->date->format('d/m/y') }} - {{ Str::limit($ev->name, 28) }}
+                                    {{ $ev->date ? \Carbon\Carbon::parse($ev->date)->format('d/m/y') : '-' }} - {{ Str::limit($ev->name, 28) }}
                                 </option>
                             @empty
                                 <option value="">Hakuna ibada zilizorekodiwa</option>
@@ -562,11 +565,11 @@
                                 <tr class="{{ $isSelected ? 'table-primary font-weight-bold' : '' }}">
                                     <td>
                                         <strong>{{ $ev->name }}</strong>
-                                        @if($ev->date->isToday())
+                                        @if($ev->date && \Carbon\Carbon::parse($ev->date)->isToday())
                                             <span class="badge badge-success ml-1">Leo</span>
                                         @endif
                                     </td>
-                                    <td>{{ $ev->date->format('d/m/Y') }}</td>
+                                    <td>{{ $ev->date ? \Carbon\Carbon::parse($ev->date)->format('d/m/Y') : '-' }}</td>
                                     <td>{{ $ev->start_time ? \Carbon\Carbon::parse($ev->start_time)->format('h:i A') : 'N/A' }}</td>
                                     <td>
                                         <span class="badge badge-primary px-2 py-1">{{ $attCount }} Waliofika</span>

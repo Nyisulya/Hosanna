@@ -15,7 +15,7 @@ class AttendanceController extends Controller
     {
         $user = auth()->user();
         $isLeader = $user->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader', 'secretary', 'deacon', 'shemasi']) 
-            || \App\Models\SmallGroup::where('leader_id', $user->id)->exists();
+            || ($user->member && \App\Models\SmallGroup::where('leader_id', $user->member->id)->exists());
         
         // If regular member without leadership privileges, show personal attendance
         if (!$isLeader) {
@@ -100,7 +100,7 @@ class AttendanceController extends Controller
         ];
 
         if ($selectedEvent) {
-            $eventAttendances = $selectedEvent->attendances;
+            $eventAttendances = $selectedEvent->attendances ?: collect();
             $present = $eventAttendances->where('status', 'present');
             $late = $eventAttendances->where('status', 'late');
             $absent = $eventAttendances->where('status', 'absent');
@@ -120,7 +120,14 @@ class AttendanceController extends Controller
             })->count();
 
             // Visitors on the event date
-            $visitorsCount = \App\Models\Visitor::whereDate('visit_date', $selectedEvent->date)->count();
+            $visitorsCount = 0;
+            if ($selectedEvent->date) {
+                try {
+                    $visitorsCount = \App\Models\Visitor::whereDate('visit_date', $selectedEvent->date)->count();
+                } catch (\Throwable $e) {
+                    $visitorsCount = 0;
+                }
+            }
 
             // Absent active members (who did not attend this service)
             $attendedMemberIds = $eventAttendances->whereIn('status', ['present', 'late'])->pluck('member_id')->toArray();
@@ -169,38 +176,52 @@ class AttendanceController extends Controller
         ];
 
         // 8. Zone / Small Group Weekly Meeting Attendance Summary
-        $smallGroups = \App\Models\SmallGroup::with(['leader', 'members'])->get();
-        $zoneMeetingStats = $smallGroups->map(function ($group) use ($selectedWeekStart, $selectedWeekEnd) {
-            $meeting = \App\Models\SmallGroupMeeting::where('small_group_id', $group->id)
-                ->whereBetween('meeting_date', [
-                    $selectedWeekStart->startOfDay(),
-                    $selectedWeekEnd->endOfDay()
-                ])
-                ->with('attendances')
-                ->latest('meeting_date')
-                ->first();
+        $zoneMeetingStats = collect();
+        try {
+            $smallGroups = \App\Models\SmallGroup::with(['leader', 'members'])->get();
+            $hasMeetingAttendancesTable = \Illuminate\Support\Facades\Schema::hasTable('small_group_meeting_attendances');
+            
+            $zoneMeetingStats = $smallGroups->map(function ($group) use ($selectedWeekStart, $selectedWeekEnd, $hasMeetingAttendancesTable) {
+                $start = (clone $selectedWeekStart)->startOfDay();
+                $end = (clone $selectedWeekEnd)->endOfDay();
+                
+                $meetingQuery = \App\Models\SmallGroupMeeting::where('small_group_id', $group->id)
+                    ->whereBetween('meeting_date', [$start, $end]);
+                    
+                if ($hasMeetingAttendancesTable) {
+                    $meetingQuery->with('attendances');
+                }
+                
+                $meeting = $meetingQuery->latest('meeting_date')->first();
 
-            $groupMembersCount = $group->members->count();
-            $attendedCount = 0;
-            $status = 'pending';
+                $groupMembersCount = $group->members ? $group->members->count() : 0;
+                $attendedCount = 0;
+                $status = 'pending';
 
-            if ($meeting) {
-                $attendedCount = $meeting->attendees_count ?: $meeting->attendances->where('status', 'present')->count();
-                $status = 'recorded';
-            }
+                if ($meeting) {
+                    if ($meeting->attendees_count) {
+                        $attendedCount = $meeting->attendees_count;
+                    } elseif ($hasMeetingAttendancesTable && $meeting->relationLoaded('attendances')) {
+                        $attendedCount = $meeting->attendances->where('status', 'present')->count();
+                    }
+                    $status = 'recorded';
+                }
 
-            $rate = $groupMembersCount > 0 ? round(($attendedCount / $groupMembersCount) * 100) : 0;
+                $rate = $groupMembersCount > 0 ? round(($attendedCount / $groupMembersCount) * 100) : 0;
 
-            return [
-                'group' => $group,
-                'leader_name' => $group->leader->full_name ?? ($group->leader->name ?? 'Haijajazwa'),
-                'total_members' => $groupMembersCount,
-                'attended' => $attendedCount,
-                'rate' => $rate,
-                'status' => $status,
-                'meeting' => $meeting,
-            ];
-        });
+                return [
+                    'group' => $group,
+                    'leader_name' => $group->leader->full_name ?? ($group->leader->name ?? 'Haijajazwa'),
+                    'total_members' => $groupMembersCount,
+                    'attended' => $attendedCount,
+                    'rate' => $rate,
+                    'status' => $status,
+                    'meeting' => $meeting,
+                ];
+            });
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Zone meeting stats error in AttendanceController: ' . $e->getMessage());
+        }
 
         // 9. Trend Chart Data (Last 8 past events)
         $trendEvents = Event::where('date', '<=', now())
@@ -216,11 +237,12 @@ class AttendanceController extends Controller
         }
 
         $trendLabels = $trendEvents->map(function ($e) {
-            return $e->date->format('d/m') . ' - ' . \Illuminate\Support\Str::limit($e->name, 10);
+            $d = $e->date ? (\Carbon\Carbon::parse($e->date)->format('d/m')) : 'N/A';
+            return $d . ' - ' . \Illuminate\Support\Str::limit($e->name, 10);
         })->values()->toArray();
 
         $trendData = $trendEvents->map(function ($e) {
-            return $e->attendances->whereIn('status', ['present', 'late'])->count();
+            return $e->attendances ? $e->attendances->whereIn('status', ['present', 'late'])->count() : 0;
         })->values()->toArray();
 
         // 10. Pass all variables to view

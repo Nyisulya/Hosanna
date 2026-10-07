@@ -419,7 +419,7 @@
           @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader', 'secretary', 'deacon', 'shemasi']))
           <li class="nav-header" style="letter-spacing:0.08em;font-size:0.68rem;color:rgba(255,255,255,0.45);padding:12px 15px 4px;text-transform:uppercase;">{{ __('Leadership') }}</li>
 
-          {{-- Members & Visitors --}}
+          {{-- Members --}}
           @can('viewAny', App\Models\Member::class)
           <li class="nav-item">
             <a href="{{ route('members.index') }}" class="nav-link {{ request()->routeIs('members.*') ? 'active' : '' }}">
@@ -427,16 +427,20 @@
               <p>{{ __('Members') }}</p>
             </a>
           </li>
+          @endcan
+
+          {{-- Visitors --}}
+          @if(Auth::user()->can('visitor-view') || Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'secretary', 'deacon', 'shemasi']))
           <li class="nav-item">
             <a href="{{ route('visitors.index') }}" class="nav-link {{ request()->routeIs('visitors.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-user-plus"></i>
               <p>{{ __('Visitors') }}</p>
             </a>
           </li>
-          @endcan
+          @endif
 
-          {{-- Attendance (Admin / Pastor / Leaders / Secretary / Deacon) --}}
-          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader', 'secretary', 'deacon', 'shemasi']) || \App\Models\SmallGroup::where('leader_id', Auth::id())->exists())
+          {{-- Attendance (Admin / Pastor / Leaders / Secretary / Deacon / Shemasi) --}}
+          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader', 'secretary', 'deacon', 'shemasi']) || \App\Models\SmallGroup::where('leader_id', Auth::user()->member->id ?? 0)->exists())
           <li class="nav-item has-treeview {{ request()->routeIs('attendance.*') ? 'menu-open' : '' }}">
             <a href="#" class="nav-link {{ request()->routeIs('attendance.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-clipboard-check"></i>

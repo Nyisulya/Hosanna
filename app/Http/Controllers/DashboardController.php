@@ -21,11 +21,6 @@ class DashboardController extends Controller
             return redirect()->route('financial.dashboard');
         }
 
-        // Deacons (Shemasi) land directly on Attendance page.
-        if ($user->hasAnyRole(['deacon', 'shemasi']) && !$user->hasAnyRole(['super_admin', 'admin', 'pastor'])) {
-            return redirect()->route('attendance.index');
-        }
-
         if (!$user->hasAnyRole(['super_admin', 'admin', 'pastor', 'secretary'])) {
             return redirect()->route('profile.index');
         }
