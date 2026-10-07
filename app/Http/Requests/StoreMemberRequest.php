@@ -25,7 +25,7 @@ class StoreMemberRequest extends FormRequest
             'full_name'                 => ['required', 'string', 'max:255'],
             'email'                     => ['nullable', 'email', 'max:255', 'unique:members,email', 'unique:users,email'],
             'password'                  => ['nullable', 'string', 'min:6'],
-            'member_type'               => ['nullable', 'string', 'in:member,pastor,department_leader,accountant,treasurer,admin'],
+            'member_type'               => ['nullable', 'string', 'in:member,pastor,department_leader,accountant,treasurer,admin,secretary,deacon,shemasi'],
             'phone'                     => ['nullable', 'string', 'max:20'],
             'gender'                    => ['nullable', 'in:male,female,other'],
             'date_of_birth'             => ['nullable', 'date'],

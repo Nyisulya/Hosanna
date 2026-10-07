@@ -79,7 +79,7 @@
                 </a>
             @endif
 
-            @if(auth()->user()->hasAnyRole(['super_admin', 'admin', 'department_leader']) && (!auth()->user()->hasRole('pastor') || auth()->user()->hasRole('super_admin')))
+            @if(auth()->user()->hasAnyRole(['super_admin', 'admin', 'department_leader', 'secretary', 'deacon', 'shemasi']) && (!auth()->user()->hasRole('pastor') || auth()->user()->hasRole('super_admin')))
                 <a href="{{ route('attendance.record') }}" class="btn btn-success btn-sm shadow-sm font-weight-bold">
                     <i class="fas fa-user-check mr-1"></i> Rekodi Mahudhurio
                 </a>
@@ -288,7 +288,7 @@
                             <i class="fas fa-user-times mr-1"></i> Wasiohudhuria ({{ max(0, $totalMembers - $selectedEventStats['total_attended']) }})
                         </a>
                     </li>
-                    @if(auth()->user()->hasAnyRole(['super_admin', 'admin', 'department_leader']) && (!auth()->user()->hasRole('pastor') || auth()->user()->hasRole('super_admin')))
+                    @if(auth()->user()->hasAnyRole(['super_admin', 'admin', 'department_leader', 'secretary', 'deacon', 'shemasi']) && (!auth()->user()->hasRole('pastor') || auth()->user()->hasRole('super_admin')))
                         <li class="nav-item ml-auto">
                             <a href="{{ route('attendance.show', $selectedEvent) }}" class="btn btn-outline-primary btn-sm my-1">
                                 <i class="fas fa-edit mr-1"></i> Rekodi / Badili Mahudhurio
@@ -585,7 +585,7 @@
                                            class="btn btn-xs {{ $isSelected ? 'btn-primary' : 'btn-outline-primary' }} font-weight-bold">
                                             <i class="fas fa-chart-pie mr-1"></i> Tazama Muhtasari
                                         </a>
-                                        @if(auth()->user()->hasAnyRole(['super_admin', 'admin', 'department_leader']) && (!auth()->user()->hasRole('pastor') || auth()->user()->hasRole('super_admin')))
+                                        @if(auth()->user()->hasAnyRole(['super_admin', 'admin', 'department_leader', 'secretary', 'deacon', 'shemasi']) && (!auth()->user()->hasRole('pastor') || auth()->user()->hasRole('super_admin')))
                                             <a href="{{ route('attendance.show', $ev) }}" class="btn btn-xs btn-outline-secondary ml-1">
                                                 <i class="fas fa-edit"></i>
                                             </a>

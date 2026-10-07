@@ -45,7 +45,8 @@
         </div>
     </div>
 
-    {{-- This Month Income --}}
+    {{-- This Month Income (Hidden for Secretary) --}}
+    @if(!auth()->user()->hasRole('secretary') || auth()->user()->hasRole('super_admin'))
     <div class="bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg rounded-lg p-6">
         <div class="flex items-center justify-between">
             <div>
@@ -62,6 +63,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     {{-- Pending Follow-ups --}}
     <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg rounded-lg p-6">
@@ -92,13 +94,15 @@
         </div>
     </div>
 
-    {{-- Financial Overview Chart --}}
+    {{-- Financial Overview Chart (Hidden for Secretary) --}}
+    @if(!auth()->user()->hasRole('secretary') || auth()->user()->hasRole('super_admin'))
     <div class="bg-white shadow-lg rounded-lg p-6">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ __('Income vs Expenses') }}</h2>
         <div style="height: 280px;">
             <canvas id="financialChart"></canvas>
         </div>
     </div>
+    @endif
 </div>
 
 {{-- Demographic Charts --}}
@@ -215,36 +219,39 @@
     });
 
     // Financial Chart
-    const financialCtx = document.getElementById('financialChart').getContext('2d');
-    new Chart(financialCtx, {
-        type: 'bar',
-        data: {
-            labels: {!! json_encode($financialData->pluck('month')) !!},
-            datasets: [{
-                label: 'Income',
-                data: {!! json_encode($financialData->pluck('income')) !!},
-                backgroundColor: 'rgba(34, 197, 94, 0.8)',
-            }, {
-                label: 'Expenses',
-                data: {!! json_encode($financialData->pluck('expense')) !!},
-                backgroundColor: 'rgba(239, 68, 68, 0.8)',
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
+    const financialEl = document.getElementById('financialChart');
+    if (financialEl) {
+        const financialCtx = financialEl.getContext('2d');
+        new Chart(financialCtx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($financialData->pluck('month')) !!},
+                datasets: [{
+                    label: 'Income',
+                    data: {!! json_encode($financialData->pluck('income')) !!},
+                    backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                }, {
+                    label: 'Expenses',
+                    data: {!! json_encode($financialData->pluck('expense')) !!},
+                    backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
                 }
             }
-        }
-    });
+        });
+    }
 
 
 

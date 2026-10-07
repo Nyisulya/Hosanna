@@ -92,6 +92,8 @@
                                 <select name="member_type" class="form-control" required>
                                     <option value="member" {{ old('member_type') == 'member' ? 'selected' : '' }}>Mshiriki wa Kawaida (Member)</option>
                                     <option value="pastor" {{ old('member_type') == 'pastor' ? 'selected' : '' }}>Mchungaji (Pastor)</option>
+                                    <option value="secretary" {{ old('member_type') == 'secretary' ? 'selected' : '' }}>Katibu wa Kanisa (Secretary)</option>
+                                    <option value="deacon" {{ old('member_type') == 'deacon' ? 'selected' : '' }}>Shemasi (Deacon)</option>
                                     <option value="department_leader" {{ old('member_type') == 'department_leader' ? 'selected' : '' }}>Kiongozi wa Idara (Leader)</option>
                                     <option value="treasurer" {{ old('member_type') == 'treasurer' ? 'selected' : '' }}>Mweka Hazina (Treasurer)</option>
                                     <option value="accountant" {{ old('member_type') == 'accountant' ? 'selected' : '' }}>Mhasibu (Accountant)</option>

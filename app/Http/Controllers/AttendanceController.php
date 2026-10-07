@@ -14,7 +14,7 @@ class AttendanceController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $isLeader = $user->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader']) 
+        $isLeader = $user->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader', 'secretary', 'deacon', 'shemasi']) 
             || \App\Models\SmallGroup::where('leader_id', $user->id)->exists();
         
         // If regular member without leadership privileges, show personal attendance

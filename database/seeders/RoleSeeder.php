@@ -120,6 +120,12 @@ class RoleSeeder extends Seeder
             'giving-category-create',
             'giving-category-edit',
             'giving-category-delete',
+
+            // Visitors
+            'visitor-view',
+            'visitor-create',
+            'visitor-edit',
+            'visitor-delete',
         ];
 
         foreach ($permissions as $permission) {
@@ -230,17 +236,68 @@ class RoleSeeder extends Seeder
         ];
         $accountant->syncPermissions($accountantPermissions);
 
-        // Secretary (Katibu) - announcements only.
-        // This role is intentionally minimal: it can fully manage church
-        // announcements (Matangazo) and nothing else. No finance, no members,
-        // no users, no other module access.
+        // Secretary (Katibu) - Full church administration & scheduling EXCEPT revenue/finance.
+        // Can manage events/schedules, volunteer rosters (assign people), announcements,
+        // members, visitors, attendance, pastoral care, small groups, communication, and reports.
+        // Strictly NO access to financial/mapato management.
         $secretary = Role::firstOrCreate(['name' => 'secretary']);
         $secretaryPermissions = [
+            'event-view',
+            'event-create',
+            'event-edit',
+            'event-delete',
+            'roster-view',
+            'roster-create',
+            'roster-edit',
+            'roster-delete',
             'announcement-view',
             'announcement-create',
             'announcement-edit',
             'announcement-delete',
+            'member-view',
+            'member-create',
+            'member-edit',
+            'visitor-view',
+            'visitor-create',
+            'visitor-edit',
+            'attendance-view',
+            'attendance-create',
+            'attendance-edit',
+            'pastoral-care-view',
+            'pastoral-care-create',
+            'pastoral-care-edit',
+            'smallgroup-view',
+            'smallgroup-create',
+            'smallgroup-edit',
+            'prayer-view',
+            'prayer-create',
+            'prayer-edit',
+            'celebration-view',
+            'communication-view',
+            'communication-create',
+            'asset-view',
+            'asset-create',
+            'asset-edit',
+            'report-view',
         ];
         $secretary->syncPermissions($secretaryPermissions);
+
+        // Deacon (Shemasi) - Attendance tracking and Visitor recording.
+        // Focused strictly on taking attendance and registering/recording visitors.
+        $deaconPermissions = [
+            'attendance-view',
+            'attendance-create',
+            'attendance-edit',
+            'visitor-view',
+            'visitor-create',
+            'visitor-edit',
+            'member-view',
+        ];
+
+        $deacon = Role::firstOrCreate(['name' => 'deacon']);
+        $deacon->syncPermissions($deaconPermissions);
+
+        $shemasi = Role::firstOrCreate(['name' => 'shemasi']);
+        $shemasi->syncPermissions($deaconPermissions);
     }
 }

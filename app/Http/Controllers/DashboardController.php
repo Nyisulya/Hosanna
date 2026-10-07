@@ -21,7 +21,12 @@ class DashboardController extends Controller
             return redirect()->route('financial.dashboard');
         }
 
-        if (!$user->hasAnyRole(['super_admin', 'admin', 'pastor'])) {
+        // Deacons (Shemasi) land directly on Attendance page.
+        if ($user->hasAnyRole(['deacon', 'shemasi']) && !$user->hasAnyRole(['super_admin', 'admin', 'pastor'])) {
+            return redirect()->route('attendance.index');
+        }
+
+        if (!$user->hasAnyRole(['super_admin', 'admin', 'pastor', 'secretary'])) {
             return redirect()->route('profile.index');
         }
 
@@ -39,25 +44,27 @@ class DashboardController extends Controller
             ]);
         }
 
-        // Financial Overview - Last 6 Months
+        // Financial Overview - Last 6 Months (Hidden for Secretary)
         $financialData = collect();
-        for ($i = 5; $i >= 0; $i--) {
-            $date = Carbon::now()->subMonths($i);
-            $income = Transaction::income()
-                ->whereYear('transaction_date', $date->year)
-                ->whereMonth('transaction_date', $date->month)
-                ->sum('amount');
-            
-            $expense = Transaction::expense()
-                ->whereYear('transaction_date', $date->year)
-                ->whereMonth('transaction_date', $date->month)
-                ->sum('amount');
-            
-            $financialData->push([
-                'month' => $date->format('M Y'),
-                'income' => $income,
-                'expense' => $expense
-            ]);
+        if (!$user->hasRole('secretary') || $user->hasRole('super_admin')) {
+            for ($i = 5; $i >= 0; $i--) {
+                $date = Carbon::now()->subMonths($i);
+                $income = Transaction::income()
+                    ->whereYear('transaction_date', $date->year)
+                    ->whereMonth('transaction_date', $date->month)
+                    ->sum('amount');
+                
+                $expense = Transaction::expense()
+                    ->whereYear('transaction_date', $date->year)
+                    ->whereMonth('transaction_date', $date->month)
+                    ->sum('amount');
+                
+                $financialData->push([
+                    'month' => $date->format('M Y'),
+                    'income' => $income,
+                    'expense' => $expense
+                ]);
+            }
         }
 
         // Attendance Trends - Last 8 weeks

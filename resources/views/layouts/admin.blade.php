@@ -192,7 +192,7 @@
             <ul class="nav nav-treeview">
 
               {{-- Dashboard --}}
-              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'treasurer', 'department_leader']))
+              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'treasurer', 'department_leader', 'secretary']))
               <li class="nav-item">
                 <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon"></i>
@@ -314,7 +314,7 @@
                   <p>{{ __('Zone Yangu') }}</p>
                 </a>
               </li>
-              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'Super Admin', 'Admin', 'Pastor']) || (Auth::user()->member && \App\Models\SmallGroup::where('leader_id', Auth::user()->member->id)->exists()))
+              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'Super Admin', 'Admin', 'Pastor', 'secretary']) || (Auth::user()->member && \App\Models\SmallGroup::where('leader_id', Auth::user()->member->id)->exists()))
               <li class="nav-item">
                 <a href="{{ route('small-groups.attendance') }}" class="nav-link {{ request()->routeIs('small-groups.attendance') || request()->routeIs('small-groups.meetings.*') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon"></i>
@@ -322,7 +322,7 @@
                 </a>
               </li>
               @endif
-              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'Super Admin', 'Admin', 'Pastor']))
+              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'Super Admin', 'Admin', 'Pastor', 'secretary']))
               <li class="nav-item">
                 <a href="{{ route('small-groups.index') }}" class="nav-link {{ request()->routeIs('small-groups.index') || request()->routeIs('small-groups.show') || request()->routeIs('small-groups.create') || request()->routeIs('small-groups.edit') ? 'active' : '' }}">
                   <i class="far fa-circle nav-icon"></i>
@@ -414,7 +414,7 @@
           {{-- ════════════════════════════════════════ --}}
           {{-- SECTION: LEADERSHIP / UONGOZI          --}}
           {{-- ════════════════════════════════════════ --}}
-          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader']))
+          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader', 'secretary', 'deacon', 'shemasi']))
           <li class="nav-header" style="letter-spacing:0.08em;font-size:0.68rem;color:rgba(255,255,255,0.45);padding:12px 15px 4px;text-transform:uppercase;">{{ __('Leadership') }}</li>
 
           {{-- Members & Visitors --}}
@@ -433,8 +433,8 @@
           </li>
           @endcan
 
-          {{-- Attendance (Admin / Pastor / Leaders) --}}
-          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader']) || \App\Models\SmallGroup::where('leader_id', Auth::id())->exists())
+          {{-- Attendance (Admin / Pastor / Leaders / Secretary / Deacon) --}}
+          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader', 'secretary', 'deacon', 'shemasi']) || \App\Models\SmallGroup::where('leader_id', Auth::id())->exists())
           <li class="nav-item has-treeview {{ request()->routeIs('attendance.*') ? 'menu-open' : '' }}">
             <a href="#" class="nav-link {{ request()->routeIs('attendance.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-clipboard-check"></i>
@@ -450,8 +450,8 @@
                   <p>{{ __('Attendance Dashboard') }}</p>
                 </a>
               </li>
-              {{-- Rekodi Mahudhurio (Manual by Deacons / Ushers / Admin) --}}
-              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'department_leader']) && (!Auth::user()->hasRole('pastor') || Auth::user()->hasRole('super_admin')))
+              {{-- Rekodi Mahudhurio (Manual by Deacons / Ushers / Secretary / Admin) --}}
+              @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'department_leader', 'secretary', 'deacon', 'shemasi']) && (!Auth::user()->hasRole('pastor') || Auth::user()->hasRole('super_admin')))
               <li class="nav-item">
                 <a href="{{ route('attendance.record') }}" class="nav-link {{ request()->routeIs('attendance.record') || request()->routeIs('attendance.show') ? 'active' : '' }}">
                   <i class="fas fa-user-check nav-icon text-success"></i>
@@ -465,7 +465,7 @@
 
 
           {{-- Communication --}}
-          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader']))
+          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'department_leader', 'secretary']))
           <li class="nav-item">
             <a href="{{ route('reports.communication.index') }}" class="nav-link {{ request()->routeIs('reports.communication.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-comments"></i>
@@ -475,7 +475,7 @@
           @endif
 
           {{-- Assets & Inventory --}}
-          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor']))
+          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'secretary']))
           <li class="nav-item">
             <a href="{{ route('assets.index') }}" class="nav-link {{ request()->routeIs('assets.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-boxes"></i>
@@ -493,7 +493,7 @@
           @endif
 
           {{-- Leaders --}}
-          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor']))
+          @if(Auth::user()->hasAnyRole(['super_admin', 'admin', 'pastor', 'secretary']))
           <li class="nav-item">
             <a href="{{ route('leaders.index') }}" class="nav-link {{ request()->routeIs('leaders.*') ? 'active' : '' }}">
               <i class="nav-icon fas fa-user-tie"></i>
