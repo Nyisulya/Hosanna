@@ -10,6 +10,17 @@
         </div>
         <div class="flex space-x-2">
             @can('update', $member)
+            @if(!empty($member->phone))
+            <form action="{{ route('members.send-credentials-sms', $member) }}" method="POST" onsubmit="return confirm('Tuma SMS ya taarifa za kuingia (Credentials) kwa mshiriki huyu? Nenosiri litarejeshwa kuwa password123.');" class="inline">
+                @csrf
+                <button type="submit" class="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700 flex items-center shadow-sm">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    Tuma SMS ya Kuingia
+                </button>
+            </form>
+            @endif
             <a href="{{ route('members.edit', $member) }}" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 flex items-center">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>

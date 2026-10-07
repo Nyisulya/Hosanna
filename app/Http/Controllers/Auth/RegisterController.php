@@ -43,8 +43,18 @@ class RegisterController extends Controller
             'user_id' => $user->id,
             'full_name' => $request->name,
             'email' => $request->email,
+            'phone' => $request->phone ?? null,
             'status' => 'active',
         ]);
+
+        if (!empty($member->phone)) {
+            \App\Services\SmsService::sendRegistrationWelcome(
+                $member->phone,
+                $member->full_name,
+                $user->email,
+                $request->password
+            );
+        }
 
         Auth::login($user);
 

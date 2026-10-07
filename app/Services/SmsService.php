@@ -592,6 +592,55 @@ class SmsService
                "Wanakanda wa Kanda ya {$groupName} tulikumiss sana katika ibada yetu ya ushirika. Tunakuombea amani na afya njema, na tunatamani sana kuwa nawe katika ibada yetu inayokuja.\n\n" .
                "Milango na mioyo yetu ipo wazi daima kukukaribisha tena. Mungu akubariki na kukufanikisha!";
     }
+
+    /**
+     * Format a rich, comprehensive welcome SMS for newly registered members
+     * Contains login credentials (email, default password) and portal link.
+     * Fits cleanly in 3-4 GSM-7 SMS segments.
+     *
+     * @param string $fullName
+     * @param string $email
+     * @param string $plainPassword
+     * @param string|null $loginUrl
+     * @return string
+     */
+    public static function buildRegistrationWelcomeMessage($fullName, $email, $plainPassword, $loginUrl = null)
+    {
+        $churchName = self::getChurchName();
+        $header = self::getHeader('USAJILI WA MSHIRIKI WA KIDIGITALI');
+        $url = !empty($loginUrl) ? $loginUrl : 'https://hossana.nyisu.com';
+
+        return "{$header}\n" .
+               "Bwana asifiwe Ndugu {$fullName},\n\n" .
+               "Karibu kwenye mfumo wa kidigitali wa kanisa ({$churchName}). Usajili wako umekamilika kikamilifu.\n\n" .
+               "Taarifa zako za kuingia kwenye mfumo:\n" .
+               "- Tovuti: {$url}\n" .
+               "- Barua Pepe (Email): {$email}\n" .
+               "- Nenosiri (Password): {$plainPassword}\n\n" .
+               "Tafadhali fungua kiungo hicho ukitumia taarifa hizi ili kutazama taarifa zako, michango, matangazo na huduma za kanisa. Baada ya kuingia, unashauriwa kubadilisha nenosiri lako kwa usalama zaidi.\n\n" .
+               "\"Bwana akubarikie, na kukulinda.\" - Hesabu 6:24\n" .
+               "Mungu akubariki sana!";
+    }
+
+    /**
+     * Send Registration Welcome SMS directly to a phone number.
+     *
+     * @param string $phone
+     * @param string $fullName
+     * @param string $email
+     * @param string $plainPassword
+     * @param string|null $loginUrl
+     * @return bool
+     */
+    public static function sendRegistrationWelcome($phone, $fullName, $email, $plainPassword, $loginUrl = null)
+    {
+        if (empty($phone)) {
+            return false;
+        }
+
+        $message = self::buildRegistrationWelcomeMessage($fullName, $email, $plainPassword, $loginUrl);
+        return self::send($phone, $message);
+    }
 }
 
 

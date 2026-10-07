@@ -38,7 +38,7 @@ class PublicRegistrationController extends Controller
         $data = $request->validate([
             'full_name'      => ['required', 'string', 'max:255'],
             'phone'          => ['required', 'string', 'max:20'],
-            'email'          => ['nullable', 'email', 'max:255'],
+            'email'          => ['nullable', 'email', 'max:255', 'unique:users,email', 'unique:members,email'],
             'gender'         => ['nullable', 'in:male,female,other'],
             'date_of_birth'  => ['nullable', 'date', 'before:today'],
             'marital_status' => ['nullable', 'in:single,married,widowed,divorced'],
@@ -47,19 +47,47 @@ class PublicRegistrationController extends Controller
             'full_name.required'   => 'Tafadhali ingiza jina lako kamili.',
             'phone.required'       => 'Tafadhali ingiza namba yako ya simu.',
             'email.email'          => 'Barua pepe uliyoingiza si sahihi.',
+            'email.unique'         => 'Barua pepe hii tayari inatumika na mtumiaji mwingine.',
             'date_of_birth.before' => 'Tarehe ya kuzaliwa haiwezi kuwa ya baadaye.',
         ]);
 
         // members.email is required and unique, so generate one when missing
-        // or when the supplied email already exists.
-        if (empty($data['email']) || Member::where('email', $data['email'])->exists()) {
+        if (empty($data['email'])) {
             $data['email'] = $this->generateUniqueEmail($data['full_name']);
         }
 
-        $data['status']            = 'pending';
-        $data['registration_type'] = 'self_registration';
+        $plainPassword = 'password123';
 
-        Member::create($data);
+        // Create User account so member can login
+        \App\Models\User::$createMemberProfile = false;
+        try {
+            $user = \App\Models\User::create([
+                'name'     => $data['full_name'],
+                'email'    => $data['email'],
+                'password' => \Illuminate\Support\Facades\Hash::make($plainPassword),
+            ]);
+        } finally {
+            \App\Models\User::$createMemberProfile = true;
+        }
+
+        // Assign default member role
+        $user->assignRole('member');
+
+        $data['user_id']           = $user->id;
+        $data['status']            = 'active';
+        $data['registration_type'] = 'Mshiriki Rasmi';
+
+        $member = Member::create($data);
+
+        // Send Welcome SMS with login credentials if phone is provided
+        if (!empty($member->phone)) {
+            \App\Services\SmsService::sendRegistrationWelcome(
+                $member->phone,
+                $member->full_name,
+                $user->email,
+                $plainPassword
+            );
+        }
 
         return redirect()->route('public.register.success');
     }
@@ -83,7 +111,7 @@ class PublicRegistrationController extends Controller
         }
 
         $candidate = $base . rand(100, 999) . '@hosannachurch.org';
-        while (Member::where('email', $candidate)->exists()) {
+        while (Member::where('email', $candidate)->exists() || \App\Models\User::where('email', $candidate)->exists()) {
             $candidate = $base . rand(1000, 9999) . '@hosannachurch.org';
         }
 

@@ -260,6 +260,7 @@ Route::prefix('reports')->middleware(['auth'])->group(function () {
 
     Route::get('/members/import', [App\Http\Controllers\ImportController::class, 'showForm'])->name('members.import');
     Route::post('/members/import', [App\Http\Controllers\ImportController::class, 'import'])->name('members.import.process');
+    Route::post('/members/{member}/send-credentials-sms', [MemberController::class, 'sendCredentialsSms'])->name('members.send-credentials-sms')->middleware(['auth']);
     Route::resource('members', MemberController::class)->middleware(['auth']);
 
     // Ministry Pledges Routes

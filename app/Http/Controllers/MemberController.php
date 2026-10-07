@@ -133,7 +133,68 @@ class MemberController extends Controller
             $member->departments()->sync($data['departments']);
         }
 
+        // Send Welcome SMS with login credentials if phone number is present
+        if (!empty($member->phone)) {
+            \App\Services\SmsService::sendRegistrationWelcome(
+                $member->phone,
+                $member->full_name,
+                $user->email,
+                $plainPassword
+            );
+        }
+
         return redirect()->route('members.index')->with('success', 'Mshiriki mpya ' . $member->full_name . ' amesajiliwa kikamilifu!');
+    }
+
+    /**
+     * Resend login credentials SMS to a member.
+     */
+    public function sendCredentialsSms(Member $member): RedirectResponse
+    {
+        $this->authorize('update', $member);
+
+        if (empty($member->phone)) {
+            return back()->with('error', 'Mshiriki huyu hana namba ya simu.');
+        }
+
+        $user = $member->user;
+        $defaultPassword = 'password123';
+
+        if (!$user) {
+            \App\Models\User::$createMemberProfile = false;
+            try {
+                $user = \App\Models\User::firstOrCreate(
+                    ['email' => $member->email],
+                    [
+                        'name'     => $member->full_name,
+                        'password' => \Illuminate\Support\Facades\Hash::make($defaultPassword),
+                    ]
+                );
+            } finally {
+                \App\Models\User::$createMemberProfile = true;
+            }
+            if (!$user->hasAnyRole(\Spatie\Permission\Models\Role::all())) {
+                $user->assignRole('member');
+            }
+            $member->update(['user_id' => $user->id]);
+        } else {
+            $user->update([
+                'password' => \Illuminate\Support\Facades\Hash::make($defaultPassword),
+            ]);
+        }
+
+        $sent = \App\Services\SmsService::sendRegistrationWelcome(
+            $member->phone,
+            $member->full_name,
+            $user->email,
+            $defaultPassword
+        );
+
+        if ($sent) {
+            return back()->with('status', 'SMS ya taarifa za kuingia imetumwa kikamilifu kwenda ' . $member->phone);
+        }
+
+        return back()->with('error', 'Imeshindwa kutuma SMS. Tafadhali hakikisha kifaa cha SMS Gate kipo hewani.');
     }
 
     /**

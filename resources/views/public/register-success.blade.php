@@ -20,16 +20,24 @@
             </svg>
         </div>
 
-        <h1 class="text-2xl font-bold text-blue-900 mb-2">Asante Sana!</h1>
-        <p class="text-gray-600 mb-6">
-            Taarifa zako zimepokelewa kwa mafanikio. Uongozi wa kanisa utazikagua na
-            kuwasiliana nawe hivi karibuni.
+        <h1 class="text-2xl font-bold text-blue-900 mb-2">Usajili Umekamilika!</h1>
+        <p class="text-gray-600 mb-4">
+            Taarifa zako zimepokelewa kikamilifu. Tumekutumia ujumbe mfupi (SMS) kwenye namba yako ya simu wenye maelezo ya akaunti yako na nenosiri la kuingilia kwenye mfumo.
+        </p>
+        <p class="text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
+            Kiungo cha mfumo: <strong>https://hossana.nyisu.com</strong>
         </p>
 
-        <a href="{{ route('public.register') }}"
-           class="inline-block w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition shadow-md">
-            Sajili Mtu Mwingine
-        </a>
+        <div class="space-y-3">
+            <a href="{{ route('login') }}"
+               class="inline-block w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition shadow-md">
+                Ingia Kwenye Mfumo (Login)
+            </a>
+            <a href="{{ route('public.register') }}"
+               class="inline-block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 rounded-lg transition">
+                Sajili Mtu Mwingine
+            </a>
+        </div>
 
         <p class="text-center text-xs text-gray-400 mt-6">
             &copy; {{ date('Y') }} {{ config('app.name', 'Hosanna Church') }}
