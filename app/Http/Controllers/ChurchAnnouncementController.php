@@ -11,6 +11,8 @@ class ChurchAnnouncementController extends Controller
     // List all general announcements
     public function index()
     {
+        abort_unless(Auth::user()->can('announcement-view'), 403);
+
         // Mark announcements as viewed
         if (Auth::check()) {
             Auth::user()->update(['last_viewed_announcements_at' => now()]);
@@ -28,12 +30,16 @@ class ChurchAnnouncementController extends Controller
     // Show create form
     public function create()
     {
+        abort_unless(Auth::user()->can('announcement-create'), 403);
+
         return view('announcements.create');
     }
 
     // Store new announcement
     public function store(Request $request)
     {
+        abort_unless(Auth::user()->can('announcement-create'), 403);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
@@ -56,18 +62,24 @@ class ChurchAnnouncementController extends Controller
     // Show single announcement
     public function show(Announcement $announcement)
     {
+        abort_unless(Auth::user()->can('announcement-view'), 403);
+
         return view('announcements.show', compact('announcement'));
     }
 
     // Show edit form
     public function edit(Announcement $announcement)
     {
+        abort_unless(Auth::user()->can('announcement-edit'), 403);
+
         return view('announcements.edit', compact('announcement'));
     }
 
     // Update announcement
     public function update(Request $request, Announcement $announcement)
     {
+        abort_unless(Auth::user()->can('announcement-edit'), 403);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'body' => 'required|string',
@@ -87,6 +99,8 @@ class ChurchAnnouncementController extends Controller
     // Delete announcement
     public function destroy(Announcement $announcement)
     {
+        abort_unless(Auth::user()->can('announcement-delete'), 403);
+
         $announcement->delete();
 
         return redirect()->route('announcements.index')

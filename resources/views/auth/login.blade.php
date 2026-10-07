@@ -19,7 +19,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Hosanna Church">
     <link rel="apple-touch-icon" href="/images/icons/icon.svg">
-    <script src="{{ asset('js/pwa-install.js') }}?v={{ time() }}" defer></script>
+    <script src="{{ asset('js/pwa-install.js') }}?v={{ filemtime(public_path('js/pwa-install.js')) }}" defer></script>
     
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">

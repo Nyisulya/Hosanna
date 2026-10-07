@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Member;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -21,7 +22,10 @@ class UserController extends Controller
     {
         $this->authorize('create', User::class);
         $roles = Role::all();
-        return view('users.create', compact('roles'));
+        $members = Member::whereNull('user_id')
+            ->orderBy('full_name')
+            ->get(['id', 'full_name', 'email', 'member_number']);
+        return view('users.create', compact('roles', 'members'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -29,17 +33,31 @@ class UserController extends Controller
         $this->authorize('create', User::class);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'member_id' => 'required|exists:members,id',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|exists:roles,name',
         ]);
 
+        $member = Member::findOrFail($validated['member_id']);
+
+        // A member can only be linked to a single user account
+        if ($member->user_id) {
+            return back()->withInput()->withErrors([
+                'member_id' => 'This member already has a user account.',
+            ]);
+        }
+
+        // The member profile already exists, so skip auto-creating one
+        User::$createMemberProfile = false;
+
         $user = User::create([
-            'name' => $validated['name'],
+            'name' => $member->full_name,
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
         ]);
+
+        $member->update(['user_id' => $user->id]);
 
         $user->assignRole($validated['role']);
 

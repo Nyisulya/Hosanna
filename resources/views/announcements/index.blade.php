@@ -25,9 +25,11 @@
                     <a href="{{ route('announcements.current') }}" class="btn btn-outline-light btn-sm mr-2 mb-2 mb-md-0 px-3 py-2 font-weight-bold shadow-sm" style="border-radius: 8px;" target="_blank">
                         <i class="fas fa-tv mr-1"></i> {{ __('Display View') }}
                     </a>
+                    @can('announcement-create')
                     <a href="{{ route('announcements.create') }}" class="btn btn-warning btn-sm px-3 py-2 font-weight-bold shadow-sm text-dark" style="border-radius: 8px; background-color: #facc15; border-color: #facc15;">
                         <i class="fas fa-plus mr-1"></i> {{ __('Add Announcement') }}
                     </a>
+                    @endcan
                 </div>
             </div>
         </div>
@@ -73,10 +75,14 @@
                     </p>
 
                     {{-- Card Actions --}}
+                    @canany(['announcement-edit', 'announcement-delete'])
                     <div class="d-flex justify-content-end align-items-center pt-2 border-top">
+                        @can('announcement-edit')
                         <a href="{{ route('announcements.edit', $announcement) }}" class="btn btn-sm btn-light text-primary mr-2 px-3 font-weight-bold" style="border-radius: 6px; border: 1px solid #e2e8f0;">
                             <i class="fas fa-edit mr-1"></i> {{ __('Edit') }}
                         </a>
+                        @endcan
+                        @can('announcement-delete')
                         <form action="{{ route('announcements.destroy', $announcement) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Are you sure you want to delete this announcement?') }}');">
                             @csrf
                             @method('DELETE')
@@ -84,7 +90,9 @@
                                 <i class="fas fa-trash-alt mr-1"></i> {{ __('Delete') }}
                             </button>
                         </form>
+                        @endcan
                     </div>
+                    @endcanany
                 </div>
             </div>
             @endforeach
@@ -147,10 +155,14 @@
                                     @endif
                                 </td>
                                 <td class="pr-4 align-middle text-right">
+                                    @canany(['announcement-edit', 'announcement-delete'])
                                     <div class="btn-group">
+                                        @can('announcement-edit')
                                         <a href="{{ route('announcements.edit', $announcement) }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px 0 0 6px;" title="{{ __('Edit') }}">
                                             <i class="fas fa-edit"></i>
                                         </a>
+                                        @endcan
+                                        @can('announcement-delete')
                                         <form action="{{ route('announcements.destroy', $announcement) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('Are you sure?') }}');">
                                             @csrf
                                             @method('DELETE')
@@ -158,7 +170,9 @@
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
                                         </form>
+                                        @endcan
                                     </div>
+                                    @endcanany
                                 </td>
                             </tr>
                             @endforeach
@@ -183,9 +197,11 @@
                 <p class="text-muted small mb-4" style="max-width: 400px; margin: 0 auto;">
                     {{ __('Bado hakuna matangazo yaliyowekwa kwenye mfumo. Bonyeza kitufe hapa chini ili kuongeza tangazo jipya.') }}
                 </p>
+                @can('announcement-create')
                 <a href="{{ route('announcements.create') }}" class="btn btn-primary px-4 py-2 font-weight-bold shadow-sm" style="border-radius: 8px;">
                     <i class="fas fa-plus mr-1"></i> {{ __('Add Announcement') }}
                 </a>
+                @endcan
             </div>
         </div>
     @endif

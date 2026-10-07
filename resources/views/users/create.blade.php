@@ -21,29 +21,41 @@
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Name -->
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2" for="name">Full Name <span class="text-red-500">*</span></label>
+                <!-- Member -->
+                <div class="mb-4 md:col-span-2">
+                    <label class="block text-gray-700 font-semibold mb-2" for="member_id">Member <span class="text-red-500">*</span></label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-user text-gray-400"></i>
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" style="z-index: 2;">
+                            <i class="fas fa-users text-gray-400"></i>
                         </div>
-                        <input type="text" name="name" id="name" value="{{ old('name') }}" class="pl-10 w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-500 @enderror" placeholder="John Doe" required>
+                        <select name="member_id" id="member_id" class="pl-10 w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('member_id') border-red-500 @enderror" required>
+                            <option value="">Select a Member</option>
+                            @foreach($members as $member)
+                                <option value="{{ $member->id }}"
+                                        data-name="{{ $member->full_name }}"
+                                        data-email="{{ $member->email }}"
+                                        {{ old('member_id') == $member->id ? 'selected' : '' }}>
+                                    {{ $member->full_name }} — {{ $member->member_number }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
-                    @error('name')
+                    <p class="text-xs text-gray-500 mt-1">Choose an existing member. The user account will be linked to this member.</p>
+                    @error('member_id')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <!-- Email -->
-                <div class="mb-4">
+                <div class="mb-4 md:col-span-2">
                     <label class="block text-gray-700 font-semibold mb-2" for="email">Email Address <span class="text-red-500">*</span></label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-envelope text-gray-400"></i>
                         </div>
-                        <input type="email" name="email" id="email" value="{{ old('email') }}" class="pl-10 w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('email') border-red-500 @enderror" placeholder="john@example.com" required>
+                        <input type="email" name="email" id="email" value="{{ old('email') }}" class="pl-10 w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 @error('email') border-red-500 @enderror" placeholder="member@example.com" required>
                     </div>
+                    <p class="text-xs text-gray-500 mt-1">Auto-filled from the selected member. You can change it if needed.</p>
                     @error('email')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -127,6 +139,27 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Member selection -> auto-fill email
+        const memberSelect = document.getElementById('member_id');
+        const emailInput = document.getElementById('email');
+
+        if (memberSelect && emailInput) {
+            const syncEmail = function () {
+                const opt = memberSelect.options[memberSelect.selectedIndex];
+                if (opt && opt.value) {
+                    const memberEmail = opt.getAttribute('data-email');
+                    if (memberEmail) {
+                        emailInput.value = memberEmail;
+                    }
+                }
+            };
+            memberSelect.addEventListener('change', syncEmail);
+            // Sync on load if a member was pre-selected (e.g. after validation error)
+            if (memberSelect.value) {
+                syncEmail();
+            }
+        }
+
         // Password Visibility Toggle
         const togglePassword = document.getElementById('togglePassword');
         const password = document.getElementById('password');

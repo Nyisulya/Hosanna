@@ -97,6 +97,12 @@ class RoleSeeder extends Seeder
             'communication-view',
             'communication-create', // Send messages
 
+            // Announcements (Matangazo)
+            'announcement-view',
+            'announcement-create',
+            'announcement-edit',
+            'announcement-delete',
+
             // Projects
             'project-view',
             'project-create',
@@ -194,6 +200,10 @@ class RoleSeeder extends Seeder
             'celebration-view',
             'communication-view',
             'communication-create',
+            'announcement-view',
+            'announcement-create',
+            'announcement-edit',
+            'announcement-delete',
             'report-view',
             'project-view',
             'pledge-view',
@@ -201,6 +211,13 @@ class RoleSeeder extends Seeder
             'finance-view',
         ];
         $pastor->syncPermissions($pastorPermissions);
+
+        // Department Leader - can view church announcements (posting is done
+        // through their own department dashboard).
+        $departmentLeader = Role::firstOrCreate(['name' => 'department_leader']);
+        $departmentLeader->syncPermissions([
+            'announcement-view',
+        ]);
 
         // Accountant (Mhasibu) - income/contributions and members only.
         // This role is intentionally minimal: it can record and view giving
@@ -212,5 +229,18 @@ class RoleSeeder extends Seeder
             'finance-create',
         ];
         $accountant->syncPermissions($accountantPermissions);
+
+        // Secretary (Katibu) - announcements only.
+        // This role is intentionally minimal: it can fully manage church
+        // announcements (Matangazo) and nothing else. No finance, no members,
+        // no users, no other module access.
+        $secretary = Role::firstOrCreate(['name' => 'secretary']);
+        $secretaryPermissions = [
+            'announcement-view',
+            'announcement-create',
+            'announcement-edit',
+            'announcement-delete',
+        ];
+        $secretary->syncPermissions($secretaryPermissions);
     }
 }
